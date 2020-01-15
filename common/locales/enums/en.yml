@@ -306,7 +306,6 @@ en:
     extent_extent_type:
       linear_feet: Linear Feet
       electronic_discs: Electronic Discs
-      envelopes: Envelopes
       files: Files
       film_reels: Film Reels
       floppy_discs: Floppy Discs
@@ -314,18 +313,12 @@ en:
       gigabytes: Gigabytes
       hard_drives: Hard Drives
       items: Items
-      leaves: Leaves (Gathered Matter)
       megabytes: Megabytes
       microfiche: Microfiche
       microfilms: Microfilms
-      phonographic_records: Phonographic Records
       photographic_negatives: Negatives (Photographs)
       photographic_slides: Slides (Photographs)
       photographs: Photographs
-      postcards: Postcards
-      posters: Posters
-      publications: Publications
-      reels: Reels
       scores: Scores
       sound_cassettes: Sound Cassettes
       sound_discs: Sound Discs
@@ -334,6 +327,7 @@ en:
       terabytes: Terabytes
       videocassettes: Videocassettes
       videodiscs: Videodiscs
+      webpages: Webpages
     collection_management_processing_priority:
       high: High
       medium: Medium
@@ -353,6 +347,15 @@ en:
       new: New
       in_progress: In Progress
       completed: Completed
+      no_work_done: No work done
+      minimal: Minimal
+      minimal_needs_revision: Minimal - needs revision
+      moderate: Moderate
+      moderate_needs_revision: Moderate - needs revision
+      intensive: Intensive
+      intensive_needs_revision: Intensive - needs revision
+      highly_intensive: Highly intensive
+      highly_intensive_needs_revision: Highly intensive - needs revision
     date_era:
       ce: ce
     date_calendar:
@@ -425,34 +428,37 @@ en:
       rad: Rules for Archival Description
       isadg: International Standard for Archival Description - General
     resource_finding_aid_status:
+      published: Published
       completed: Completed
-      in_progress: In Progress
-      under_revision: Under Revision
+      in_process: In process
       unprocessed: Unprocessed
+      minimally_processed: Minimally processed
     instance_instance_type:
       accession: Accession
       audio: Audio
       books: Books
       computer_disks: Computer Disks
       digital_object: Digital Object
-      digital_object_link: Digital Object Link
       graphic_materials: Graphic Materials
       maps: Maps
-      microform: Microform
       mixed_materials: Mixed Materials
       moving_images: Moving Images
       realia: Realia
       text: Text
+      photographs: Photographs
     accession_acquisition_type:
       deposit: Deposit
       gift: Gift
       purchase: Purchase
       transfer: Transfer
     accession_resource_type:
-      collection: Collection
-      publications: Publications
       papers: Papers
       records: Records
+      publications: Publications
+      collection: Collection
+      photographs: Photographs
+      memorabilia: Memorabilia
+      scores: Scores      
     subject_source:
       aat: "Art & Architecture Thesaurus"
       cash: Canadian Subject Headings
@@ -491,6 +497,7 @@ en:
       page: Page
       reel: Reel
       volume: Volume
+      oversize_file: Oversize file
     file_version_use_statement:
       audio-clip: Audio-Clip
       audio-master: Audio-Master
@@ -1734,4 +1741,3 @@ en:
     user_defined_enum_3: User Defined Enum 3
     user_defined_enum_4: User Defined Enum 4
     job_type: Job Type
-
