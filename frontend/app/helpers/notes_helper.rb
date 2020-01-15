@@ -3,6 +3,7 @@ require 'mixed_content_parser'
 module NotesHelper
 
   def note_types_for(jsonmodel_type)
+
     note_types = {
       "bibliography" => {
         :target => :note_bibliography,
@@ -23,14 +24,56 @@ module NotesHelper
         }
       end
 
+    elsif jsonmodel_type =~ /lang_material/
+
+      note_types = {
+        "langmaterial" => {
+          :target => :note_langmaterial,
+          :value => "langmaterial",
+          :i18n => I18n.t("enumerations._note_types.langmaterial", :default => "langmaterial")
+        }
+      }
+
     elsif jsonmodel_type =~ /agent/
 
-      note_types = {"bioghist" => {
+      note_types = {
+        "bioghist" => {
           :target => :note_bioghist,
           :value => "bioghist",
           :i18n => I18n.t("enumerations._note_types.bioghist", :default => "bioghist")
+        },
+        "agent_rights_statement" => {
+          :target => :note_agent_rights_statement,
+          :value => "agent_rights_statement",
+          :i18n => I18n.t("note.note_agent_rights_statement")
         }
       }
+
+    elsif jsonmodel_type == 'rights_statement'
+
+      note_types = {}
+
+      JSONModel.enum_values(JSONModel(:note_rights_statement).schema['properties']['type']['dynamic_enum']).each do |type|
+        note_types[type] = {
+          :target => :note_rights_statement,
+          :enum => JSONModel(:note_rights_statement).schema['properties']['type']['dynamic_enum'],
+          :value => type,
+          :i18n => I18n.t("enumerations.#{JSONModel(:note_rights_statement).schema['properties']['type']['dynamic_enum']}.#{type}", :default => type)
+        }
+      end
+
+    elsif jsonmodel_type == 'rights_statement_act'
+
+      note_types = {}
+
+      JSONModel.enum_values(JSONModel(:note_rights_statement_act).schema['properties']['type']['dynamic_enum']).each do |type|
+        note_types[type] = {
+          :target => :note_rights_statement_act,
+          :enum => JSONModel(:note_rights_statement_act).schema['properties']['type']['dynamic_enum'],
+          :value => type,
+          :i18n => I18n.t("enumerations.#{JSONModel(:note_rights_statement_act).schema['properties']['type']['dynamic_enum']}.#{type}", :default => type)
+        }
+      end
 
     else
 

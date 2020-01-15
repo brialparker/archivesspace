@@ -59,6 +59,11 @@ describe 'Relationships' do
     $testdb.drop_table(:cherry)
     $testdb.drop_table(:fruit_salad_rlshp)
     $testdb.drop_table(:friends_rlshp)
+
+    Relationships.send(:remove_const, :BananaFruitSalad)
+    Relationships.send(:remove_const, :BananaFriends)
+    Relationships.send(:remove_const, :AppleFruitSalad)
+    Relationships.send(:remove_const, :AppleFriends)
   end
 
 
@@ -142,7 +147,6 @@ describe 'Relationships' do
 
     class Apple < Sequel::Model(:apple)
       include ASModel
-      include Relationships
       set_model_scope :global
       corresponds_to JSONModel(:apple)
       clear_relationships
@@ -153,7 +157,6 @@ describe 'Relationships' do
 
     class Banana < Sequel::Model(:banana)
       include ASModel
-      include Relationships
       set_model_scope :global
       corresponds_to JSONModel(:banana)
 
@@ -199,12 +202,12 @@ describe 'Relationships' do
     banana = Banana.create_from_json(banana_json)
 
     # Check the forwards relationship
-    Banana.to_jsonmodel(banana).apples[0]['ref'].should eq(apple.uri)
-    Banana.to_jsonmodel(banana).apples[0]['sauce'].should eq('yogurt')
+    expect(Banana.to_jsonmodel(banana).apples[0]['ref']).to eq(apple.uri)
+    expect(Banana.to_jsonmodel(banana).apples[0]['sauce']).to eq('yogurt')
 
     # And the reciprocal one
-    Apple.to_jsonmodel(apple).bananas[0]['ref'].should eq(banana.uri)
-    Apple.to_jsonmodel(apple).bananas[0]['sauce'].should eq('yogurt')
+    expect(Apple.to_jsonmodel(apple).bananas[0]['ref']).to eq(banana.uri)
+    expect(Apple.to_jsonmodel(apple).bananas[0]['sauce']).to eq('yogurt')
   end
 
 
@@ -222,8 +225,8 @@ describe 'Relationships' do
     banana = Banana.create_from_json(banana_json)
 
     # Check the forwards relationship
-    Banana.to_jsonmodel(banana).apples[0]['ref'].should eq(apple.uri)
-    Banana.to_jsonmodel(banana).apples[0]['sauce'].should eq('yogurt')
+    expect(Banana.to_jsonmodel(banana).apples[0]['ref']).to eq(apple.uri)
+    expect(Banana.to_jsonmodel(banana).apples[0]['sauce']).to eq('yogurt')
 
     # Clear the relationship by updating the apple to remove the banana
     apple.refresh
@@ -232,7 +235,7 @@ describe 'Relationships' do
 
     # Now the banana has no apples listed
     banana.refresh
-    Banana.to_jsonmodel(banana).apples.should eq([])
+    expect(Banana.to_jsonmodel(banana).apples).to eq([])
   end
 
 
@@ -246,13 +249,13 @@ describe 'Relationships' do
 
 
     # Now you see it
-    banana.my_relationships(:fruit_salad).count.should_not be(0)
+    expect(banana.my_relationships(:fruit_salad).count).not_to be(0)
 
     apple.delete
 
     # Now you don't
     banana.reload
-    banana.my_relationships(:fruit_salad).count.should eq(0)
+    expect(banana.my_relationships(:fruit_salad).count).to eq(0)
   end
 
 
@@ -265,7 +268,7 @@ describe 'Relationships' do
     time = Time.now.to_f
     banana = Banana.create_from_json(banana_json)
 
-    banana.my_relationships(:fruit_salad)[0][:system_mtime].to_f.should be >= time
+    expect(banana.my_relationships(:fruit_salad)[0][:system_mtime].to_f).to be >= time
   end
 
 
@@ -283,10 +286,10 @@ describe 'Relationships' do
     apple = Apple.create_from_json(JSONModel(:apple).new(:name => "granny smith"))
     banana = Banana.create_from_json(JSONModel(:banana).new(:friends => [{:ref => apple.uri}]))
 
-    banana.related_records(:friends).count.should eq(1)
+    expect(banana.related_records(:friends).count).to eq(1)
     apple.delete
     banana.reload
-    banana.related_records(:friends).count.should eq(0)
+    expect(banana.related_records(:friends).count).to eq(0)
   end
 
 
@@ -295,7 +298,7 @@ describe 'Relationships' do
     banana2 = Banana.create_from_json(JSONModel(:banana).new(:friends => [{:ref => banana1.uri}]))
     banana1.refresh
 
-    banana2.related_records(:friends)[0].should eq(banana1)
+    expect(banana2.related_records(:friends)[0]).to eq(banana1)
   end
 
 
@@ -326,7 +329,7 @@ describe 'Relationships' do
 
     expect {
       cherry.save
-    }.to_not raise_error
+    }.not_to raise_error
   end
 
 
@@ -345,7 +348,7 @@ describe 'Relationships' do
     cherry.update_from_json(JSONModel(:cherry).from_hash(:lock_version => 0))
     banana.refresh
 
-    (banana.system_mtime.to_f * 1000).to_i.should_not eq(time)
+    expect((banana.system_mtime.to_f * 1000).to_i).not_to eq(time)
   end
 
 
@@ -357,7 +360,88 @@ describe 'Relationships' do
                                                               :ref => cherry.uri
                                                             }]))
 
-    banana.my_relationships(:friends).first.suppressed.should eq(1)
+    expect(banana.my_relationships(:friends).first.suppressed).to eq(1)
+  end
+
+  it "will raise a exception if the optisitmic locking fails" do
+    # this is supposed to replicate when a relationship is attempted to be
+    # made, but the Sequel throws an optimisitcLocking error
+    allow(DB).to receive(:increase_lock_version_or_fail).and_raise(Sequel::Plugins::OptimisticLocking::Error.new("Couldn't create version of blah"))
+    apple = Apple.create_from_json(JSONModel(:apple).new(:name => "IIe"))
+
+    # by default we just try once and raise an error
+    attempt =0
+    expect {
+      banana_json = JSONModel(:banana).new(:apples => [{
+                                                       :ref => apple.uri,
+                                                       :sauce => "white"
+                                                     }])
+      attempt += 1
+      Banana.create_from_json(banana_json)
+    }.to raise_error(Sequel::NoExistingObject)
+    expect(attempt).to eq(1)
+
+  end
+
+  it "will retry on optimistic locking failue if told to do so" do
+    # in some situations ( like EAD imports ), we want to retry
+    allow(DB).to receive(:increase_lock_version_or_fail).and_raise(Sequel::Plugins::OptimisticLocking::Error.new("Couldn't create version of blah"))
+    apple = Apple.create_from_json(JSONModel(:apple).new(:name => "Lisa"))
+
+    # we can tell the db to retry ( it will do 10 times by default )
+    attempt =0
+    expect {
+      DB.open(true, :retries => 6, :retry_on_optimistic_locking_fail => true, :retry_delay => 0 )  do
+        banana_json = JSONModel(:banana).new(:apples => [{
+                                                       :ref => apple.uri,
+                                                       :sauce => "black"
+                                                     }])
+        attempt += 1
+        Banana.create_from_json(banana_json)
+      end
+    }.to raise_error(Sequel::NoExistingObject)
+    expect(attempt).to eq(6)
+  end
+
+
+  it "updates the mtime of all related records, following nested records back to top-level records as required" do
+    # Ditching our fruit salad metaphor for the moment, since this actually
+    # happens in real life...
+
+    # We have a digital object
+    digital_object = create(:json_digital_object)
+
+    # and an archival object that links to it via instance
+    archival_object_json = create(:json_archival_object,
+                                  :instances => [
+                                    build(:json_instance_digital,
+                                          :digital_object => {
+                                            :ref => digital_object.uri
+                                          })
+                                  ])
+
+    archival_object = ArchivalObject[archival_object_json.id]
+
+    start_time = (archival_object[:system_mtime].to_f * 1000).to_i
+    sleep 0.1
+
+    # Touch the digital object
+    digital_object.refetch
+    digital_object.save
+
+    # We want to see the archival object's mtime updated, since that's the
+    # top-level record that should be reindexed.  The original bug: only the
+    # instance's system_mtime was updated.
+    archival_object.refresh
+    expect((archival_object.system_mtime.to_f * 1000).to_i).not_to eq(start_time)
+  end
+
+
+  it "gives defined relationship classes names" do
+    expect{Relationships::BananaFruitSalad}.to_not raise_error
+    expect{Relationships::BananaFriends}.to_not raise_error
+    expect{Relationships::AppleFruitSalad}.to_not raise_error
+    expect{Relationships::AppleFriends}.to_not raise_error
   end
 
 end

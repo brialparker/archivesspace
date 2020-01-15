@@ -1,9 +1,10 @@
 require 'asconstants'
 require 'memoryleak'
 require 'search'
+require 'zlib'
 
 class ApplicationController < ActionController::Base
-  protect_from_forgery
+  protect_from_forgery with: :exception
 
   helper :all
 
@@ -14,23 +15,21 @@ class ApplicationController < ActionController::Base
 
   # Allow overriding of templates via the local folder(s)
   if not ASUtils.find_local_directories.blank?
-    ASUtils.find_local_directories.map{|local_dir| File.join(local_dir, 'frontend', 'views')}.reject { |dir| !Dir.exists?(dir) }.each do |template_override_directory|
+    ASUtils.find_local_directories.map{|local_dir| File.join(local_dir, 'frontend', 'views')}.reject { |dir| !Dir.exist?(dir) }.each do |template_override_directory|
       prepend_view_path(template_override_directory)
     end
   end
 
   # Note: This should be first!
-  before_filter :store_user_session
+  before_action :store_user_session
 
-  before_filter :determine_browser_support
+  before_action :refresh_permissions
 
-  before_filter :refresh_permissions
+  before_action :refresh_preferences
 
-  before_filter :refresh_preferences
+  before_action :load_repository_list
 
-  before_filter :load_repository_list
-
-  before_filter :unauthorised_access
+  before_action :unauthorised_access
 
   def self.permission_mappings
     Array(@permission_mappings)
@@ -50,12 +49,12 @@ class ApplicationController < ActionController::Base
   def self.set_access_control(permission_mappings)
     @permission_mappings = permission_mappings
 
-    skip_before_filter :unauthorised_access, :only => Array(permission_mappings.values).flatten.uniq
+    skip_before_action :unauthorised_access, :only => Array(permission_mappings.values).flatten.uniq
 
     permission_mappings.each do |permission, actions|
       next if permission === :public
 
-      before_filter(:only => Array(actions)) {|c| user_must_have(permission)}
+      before_action(:only => Array(actions)) {|c| user_must_have(permission)}
     end
   end
 
@@ -88,10 +87,29 @@ class ApplicationController < ActionController::Base
 
       instance = cleanup_params_for_schema(params[opts[:instance]], model.schema)
 
+
+
       if opts[:replace] || opts[:replace].nil?
         obj.replace(instance)
       else
         obj.update(instance)
+      end
+
+      if opts[:required]
+        required = opts[:required]
+        missing, min_items = compare(required, obj)
+        #render :text => missing
+        if !missing.nil?
+          missing.each do |field_name|
+            obj.add_error(field_name, "Property is required but was missing")
+          end
+        end
+        if !min_items.nil?
+          min_items.each do |item|
+            message = "At least #{item['num']} item(s) is required"
+            obj.add_error(item['name'], message)
+          end
+        end
       end
 
       # Make the updated object available to templates
@@ -115,6 +133,7 @@ class ApplicationController < ActionController::Base
       else
         id = obj.save
       end
+
       opts[:on_valid].call(id)
     rescue ConflictException
       instance_variable_set(:"@record_is_stale".intern, true)
@@ -131,7 +150,11 @@ class ApplicationController < ActionController::Base
     request = JSONModel(:merge_request).new
     request.target = {'ref' => target_uri}
     request.victims = Array.wrap(victims).map { |victim| { 'ref' => victim  } }
-
+    if params[:id]
+      id = params[:id]
+    else
+      id = target_uri.split('/')[-1]
+    end
     begin
       request.save(:record_type => merge_type)
       flash[:success] = I18n.t("#{merge_type}._frontend.messages.merged")
@@ -140,15 +163,25 @@ class ApplicationController < ActionController::Base
       redirect_to(resolver.view_uri)
     rescue ValidationException => e
       flash[:error] = e.errors.to_s
-      redirect_to({:action => :show, :id => params[:id]}.merge(extra_params))
+      redirect_to({:action => :show, :id => id}.merge(extra_params))
+    rescue ConflictException => e
+      flash[:error] = I18n.t("errors.merge_conflict", :message => e.conflicts)
+      redirect_to({:action => :show, :id => id}.merge(extra_params))
     rescue RecordNotFound => e
       flash[:error] = I18n.t("errors.error_404")
-      redirect_to({:action => :show, :id => params[:id]}.merge(extra_params))
+      redirect_to({:action => :show, :id => id}.merge(extra_params))
     end
   end
 
 
   def handle_accept_children(target_jsonmodel)
+    unless params[:children]
+      # Nothing to do
+      return render :json => {
+                      :position => params[:index].to_i
+                    }
+    end
+
     response = JSONModel::HTTP.post_form(target_jsonmodel.uri_for(params[:id]) + "/accept_children",
                                          "children[]" => params[:children],
                                          "position" => params[:index].to_i)
@@ -169,7 +202,7 @@ class ApplicationController < ActionController::Base
   def find_opts
     {
       "resolve[]" => ["subjects", "related_resources", "linked_agents",
-                      "revision_statements", 
+                      "revision_statements",
                       "container_locations", "digital_object", "classifications",
                       "related_agents", "resource", "parent", "creator",
                       "linked_instances", "linked_records", "related_accessions",
@@ -178,6 +211,10 @@ class ApplicationController < ActionController::Base
                       "top_container", "container_profile", "location_profile",
                       "owner_repo"]
     }
+  end
+
+  def user_is_global_admin?
+    session['user'] and session['user'] == "admin"
   end
 
 
@@ -189,15 +226,93 @@ class ApplicationController < ActionController::Base
   def user_needs_to_be_a_user
     unauthorised_access if not session['user']
   end
-  
+
   def user_needs_to_be_a_user_manager
     unauthorised_access if not user_can? 'manage_users'
   end
-  
+
   def user_needs_to_be_a_user_manager_or_new_user
     unauthorised_access if session['user'] and not user_can? 'manage_users'
   end
 
+  def user_needs_to_be_global_admin
+    unauthorised_access if not user_is_global_admin?
+  end
+
+  def compare(required, obj)
+    missing = []
+    min_items = []
+    required.keys.each do |key|
+      if required[key].is_a? Array and obj[key].is_a? Array
+        if required[key].length > obj[key].length
+          min_items << {"name" => key, "num" => required[key].length}
+        elsif required[key].length === obj[key].length
+
+          required[key].zip(obj[key]).each_with_index do |(required_a, obj_a), index|
+            required_a.keys.each do |nested_key|
+              if required_a[nested_key].is_a? Array and obj_a[nested_key].is_a? Array
+                missing2, min_items2 = compare_nested_arrays(required_a, obj_a, index, key, nested_key)
+                missing = missing.concat(missing2)
+                min_items = min_items.concat(min_items2)
+              elsif required_a[nested_key].is_a? Hash
+                if !obj_a.key?(nested_key)
+                  min_items << {"name" => "#{key}/#{index}/#{nested_key}", "num" => 1}
+                end
+                required_a[nested_key].keys.each do |nested_key2|
+                  if required_a[nested_key][nested_key2].is_a? String and obj_a.key?(nested_key)
+                    if required_a[nested_key][nested_key2] === "REQ" and obj_a[nested_key][nested_key2] === ""
+                      missing << "#{key}/#{index}/#{nested_key}/#{nested_key2}"
+                    end
+                  end
+                end
+              elsif required_a[nested_key].is_a? String
+                if required_a[nested_key] === "REQ" and obj_a[nested_key] === ""
+                  missing << "#{key}/#{index}/#{nested_key}"
+                end
+              end
+            end
+          end
+        end
+      end
+      if required[key].is_a? String
+         if required[key] === "REQ" and obj[key] === ""
+            missing << key
+        end
+      end
+    end
+    return missing, min_items
+  end
+
+  def compare_nested_arrays(required_a, obj_a, index, key, nested_key)
+    missing = []
+    min_items = []
+    if required_a[nested_key].length > obj_a[nested_key].length
+      min_items << {"name" => "#{key}/#{index}/#{nested_key}", "num" => required_a[nested_key].length}
+    elsif required_a[nested_key].length === obj_a[nested_key].length
+
+      required_a[nested_key].zip(obj_a[nested_key]).each_with_index do |(required_a2, obj_a2), index2|
+        required_a2.keys.each do |nested_key2|
+          if required_a2[nested_key2].is_a? Hash
+            if !obj_a2.key?(nested_key2)
+              min_items << {"name" => "#{key}/#{index}/#{nested_key}/#{index2}/#{nested_key2}", "num" => 1}
+            end
+            required_a2[nested_key2].keys.each do |nested_key3|
+              if required_a2[nested_key2][nested_key3].is_a? String and obj_a2[nested_key2].key?(nested_key3)
+                if required_a2[nested_key2][nested_key3] === "REQ" and obj_a2[nested_key2][nested_key3] === ""
+                  missing << "#{key}/#{index}/#{nested_key}/#{index2}/#{nested_key2}/#{nested_key3}"
+                end
+              end
+            end
+          elsif required_a2[nested_key2].is_a? String
+            if required_a2[nested_key2] === "REQ" and obj_a2[nested_key2] === ""
+              missing << "#{key}/#{index}/#{nested_key}/#{index2}/#{nested_key2}"
+            end
+          end
+        end
+      end
+    end
+    return missing, min_items
+  end
 
   helper_method :user_prefs
   def user_prefs
@@ -217,9 +332,21 @@ class ApplicationController < ActionController::Base
   end
 
 
-  def self.session_repo(session, repo)
+  # ANW-617: To generate public URLs correctly in the show pages for various entities, we need access to the repository slug.
+  # Since the JSON objects for these does not have this info, we load it into the session along with other repo data when a repo is selected for convienience.
+  def self.session_repo(session, repo, repo_slug = nil)
     session[:repo] = repo
     session[:repo_id] = JSONModel(:repository).id_for(repo)
+
+    # if the slug has been passed in, we don't need to do a DB lookup.
+    # if not, we go get it so links are generated correctly after login.
+    if repo_slug
+      session[:repo_slug] = repo_slug
+    else
+      full_repo_json = JSONModel(:repository).find(session[:repo_id])
+      session[:repo_slug] = full_repo_json[:slug]
+    end
+
     self.user_preferences(session)
   end
 
@@ -248,7 +375,16 @@ class ApplicationController < ActionController::Base
     permissions_s = context.send(:cookies).signed[:archivesspace_permissions]
 
     if permissions_s
-      permissions = ASUtils.json_parse(permissions_s)
+      # Putting this check in for backwards compatibility with the uncompressed
+      # cookies.  This can be removed at a future point once everyone's running
+      # with compressed cookies.
+      json = if permissions_s.start_with?('ZLIB:')
+               Zlib::Inflate.inflate(permissions_s[5..-1])
+             else
+               permissions_s
+             end
+
+      permissions = ASUtils.json_parse(json)
     else
       return false
     end
@@ -366,30 +502,14 @@ class ApplicationController < ActionController::Base
   end
 
 
-
-  def determine_browser_support
-    if session[:browser_support]
-      @browser_support = session[:browser_support].intern
-      return
-    end
-
-    user_agent = UserAgent.parse(request.user_agent)
-
-    @browser_support = :unknown
-    if BrowserSupport.bronze.detect {|browser| user_agent <= browser}
-      @browser_support = :bronze
-    elsif BrowserSupport.silver.detect {|browser| user_agent <= browser}
-      @browser_support = :silver
-    elsif BrowserSupport.silver.detect {|browser| user_agent > browser} || BrowserSupport.gold.detect {|browser| user_agent >= browser}
-      @browser_support = :gold
-    end
-
-    session[:browser_support] = @browser_support
-  end
-
   protected
 
   def cleanup_params_for_schema(params_hash, schema)
+    # We're expecting a HashWithIndifferentAccess...
+    if params_hash.respond_to?(:to_unsafe_hash)
+      params_hash = params_hash.to_unsafe_hash
+    end
+
     fix_arrays = proc do |hash, schema|
       result = hash.clone
 
@@ -491,7 +611,7 @@ class ApplicationController < ActionController::Base
   end
 
   def params_for_backend_search
-    params_for_search = params.select{|k,v| ["page", "q", "type", "sort", "exclude", "filter_term", "simple_filter"].include?(k) and not v.blank?}
+    params_for_search = params.select{|k,v| ["page", "q", "aq", "type", "sort", "exclude", "filter_term", "fields"].include?(k) and not v.blank?}
 
     params_for_search["page"] ||= 1
 
@@ -504,15 +624,20 @@ class ApplicationController < ActionController::Base
       params_for_search["filter_term[]"] = Array(params_for_search["filter_term"]).reject{|v| v.blank?}
       params_for_search.delete("filter_term")
     end
-    
-    if params_for_search["simple_filter"]
-      params_for_search["simple_filter[]"] = Array(params_for_search["simple_filter"]).reject{|v| v.blank?}
-      params_for_search.delete("simple_filter")
+
+    if params_for_search["aq"]
+      # Just validate it
+      params_for_search["aq"] = JSONModel(:advanced_query).from_json(params_for_search["aq"]).to_json
     end
 
     if params_for_search["exclude"]
       params_for_search["exclude[]"] = Array(params_for_search["exclude"]).reject{|v| v.blank?}
       params_for_search.delete("exclude")
+    end
+
+    if params_for_search["fields"]
+      params_for_search["fields[]"] = Array(params_for_search["fields"]).reject{|v| v.blank?}
+      params_for_search.delete("fields")
     end
 
     params_for_search
@@ -550,7 +675,7 @@ class ApplicationController < ActionController::Base
 
   helper_method :default_advanced_search_queries
   def default_advanced_search_queries
-    [{"i" => 0, "type" => "text"}]
+    [{"i" => 0, "type" => "text", "comparator" => "contains"}]
   end
 
 
@@ -558,7 +683,7 @@ class ApplicationController < ActionController::Base
   def advanced_search_queries
     return default_advanced_search_queries if !params["advanced"]
 
-    indexes = params.keys.collect{|k| k[/^v(?<index>[\d]+)/, "index"]}.compact.sort{|a,b| a.to_i <=> b.to_i}
+    indexes = params.keys.collect{|k| k[/^f(?<index>[\d]+)/, "index"]}.compact.sort{|a,b| a.to_i <=> b.to_i}
 
     return default_advanced_search_queries if indexes.empty?
 
@@ -571,6 +696,11 @@ class ApplicationController < ActionController::Base
         "type" => params["t#{i}"]
       }
 
+      if query["type"] == "text"
+        query["comparator"] = params["top#{i}"]
+        query["empty"] = query["comparator"] == "empty"
+      end
+
       if query["op"] === "NOT"
         query["op"] = "AND"
         query["negated"] = true
@@ -578,14 +708,22 @@ class ApplicationController < ActionController::Base
 
       if query["type"] == "date"
         query["comparator"] = params["dop#{i}"]
+        query["empty"] = query["comparator"] == "empty"
       end
 
       if query["type"] == "boolean"
-        query["value"] = query["value"] == "true"
+        query["value"] = query["value"] == "empty" ? "empty" : query["value"] == "true"
+        query["empty"] = query["value"] == "empty"
+      end
+
+      if query["type"] == "enum"
+        query["empty"] = query["value"].blank?
       end
 
       query
     }
   end
+
+
 
 end

@@ -2,19 +2,22 @@ class ExportsController < ApplicationController
 
   set_access_control  "view_repository" => [:container_labels, :download_marc, :download_dc, :download_mods,
                                             :download_mets, :download_ead, :download_eac]
+  set_access_control "create_job" => [:print_to_pdf]
 
   include ExportHelper
 
 
   def container_labels
-     download_export(
-       "/repositories/#{JSONModel::repository}/resource_labels/#{params[:id]}.tsv")
+    @resource = JSONModel(:resource).find(params[:id], find_opts)
+    render :layout => false
    end
-  
-  
+
+
   def download_marc
     download_export(
-      "/repositories/#{JSONModel::repository}/resources/marc21/#{params[:id]}.xml")
+      "/repositories/#{JSONModel::repository}/resources/marc21/#{params[:id]}.xml",
+      :include_unpublished_marc => params[:include_unpublished_marc]
+      )
   end
 
 
@@ -23,39 +26,45 @@ class ExportsController < ApplicationController
       "/repositories/#{JSONModel::repository}/digital_objects/dublin_core/#{params[:id]}.xml")
   end
 
-  
+
   def download_mods
     download_export(
       "/repositories/#{JSONModel::repository}/digital_objects/mods/#{params[:id]}.xml")
   end
 
 
-    
+
   def download_mets
-    download_export( 
-      "/repositories/#{JSONModel::repository}/digital_objects/mets/#{params[:id]}.xml")
-  end  
-  
+    download_export(
+      "/repositories/#{JSONModel::repository}/digital_objects/mets/#{params[:id]}.xml", :dmd => params[:dmd_scheme])
+  end
+
 
   def download_ead
-    
+
     if params[:print_pdf] == "true"
       url = "/repositories/#{JSONModel::repository}/resource_descriptions/#{params[:id]}.pdf"
     else
       url = "/repositories/#{JSONModel::repository}/resource_descriptions/#{params[:id]}.xml"
     end
-    
+
     download_export(url,
                     :include_unpublished => (params[:include_unpublished] ? params[:include_unpublished] : false),
                     :print_pdf => (params[:print_pdf] ? params[:print_pdf] : false),
                     :include_daos => (params[:include_daos] ? params[:include_daos] : false),
-                    :numbered_cs => (params[:numbered_cs] ? params[:numbered_cs] : false))
+                    :numbered_cs => (params[:numbered_cs] ? params[:numbered_cs] : false),
+                    :ead3 => (params[:ead3] ? params[:ead3] : false))
   end
-  
-  
+
+
   def download_eac
     download_export(
       "/repositories/#{JSONModel::repository}/archival_contexts/#{params[:type].sub(/^agent_/, '').pluralize}/#{params[:id]}.xml")
+  end
+
+  def print_to_pdf
+    @resource = JSONModel(:resource).find(params[:id], find_opts)
+    render :layout => false
   end
 
 
@@ -67,7 +76,7 @@ class ExportsController < ApplicationController
 
     respond_to do |format|
       format.html {
-        self.response.headers["Content-Type"] ||= meta['mimetype']
+        self.response.headers["Content-Type"] = meta['mimetype'] if meta['mimetype']
         self.response.headers["Content-Disposition"] = "attachment; filename=#{meta['filename']}"
         self.response.headers['Last-Modified'] = Time.now.ctime.to_s
 

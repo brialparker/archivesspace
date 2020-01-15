@@ -1,8 +1,23 @@
 class Repository < Sequel::Model(:repository)
   include ASModel
+  include Publishable
+  include AutoGenerator
 
   set_model_scope :global
   corresponds_to JSONModel(:repository)
+
+  auto_generate :property => :slug,
+                :generator => proc { |json|
+                  if json["is_slug_auto"]
+                    # Always use repo_code
+                    SlugHelpers.id_based_slug_for(json, Repository)
+                  elsif json["slug"]
+                    cleaned_slug = SlugHelpers.clean_slug(json["slug"])
+                    SlugHelpers.run_dedupe_slug(cleaned_slug)
+                  else
+                    SlugHelpers.id_based_slug_for(json, Repository)
+                  end
+                }
 
   def validate
     super
@@ -40,42 +55,59 @@ class Repository < Sequel::Model(:repository)
                          :description => "Managers of the #{repo_code} repository",
                          :grants_permissions => ["manage_repository", "update_location_record", "update_subject_record",
                                                  "update_agent_record", "update_accession_record", "update_resource_record",
-                                                 "update_digital_object_record", "update_event_record", "view_repository",
-                                                 "delete_archival_record", "suppress_archival_record",
-                                                 "manage_subject_record", "manage_agent_record", "manage_vocabulary_record",
-                                                 "manage_rde_templates",
-                                                 "import_records"]
+                                                 "update_digital_object_record", "update_event_record", "update_container_record",
+                                                 "update_container_profile_record", "update_location_profile_record",
+                                                 "view_repository", "delete_archival_record", "suppress_archival_record",
+                                                 "manage_subject_record", "manage_agent_record", "view_agent_contact_record", "manage_vocabulary_record",
+                                                 "manage_rde_templates", "manage_container_record", "manage_container_profile_record",
+                                                 "manage_location_profile_record", "import_records", "cancel_job",
+                                                 "update_assessment_record", "delete_assessment_record", "manage_assessment_attributes",
+                                                 "update_enumeration_record", "manage_enumeration_record"]
                        },
                        {
                          :group_code => "repository-archivists",
                          :description => "Archivists of the #{repo_code} repository",
                          :grants_permissions => ["update_subject_record", "update_agent_record", "update_accession_record",
                                                  "update_resource_record", "update_digital_object_record", "update_event_record",
-                                                 "view_repository", "manage_subject_record", "manage_agent_record",
-                                                 "manage_vocabulary_record", "import_records"]
+                                                 "update_container_record", "update_container_profile_record",
+                                                 "update_location_profile_record", "view_repository", "manage_subject_record",
+                                                 "manage_agent_record", "view_agent_contact_record", "manage_vocabulary_record", "manage_container_record",
+                                                 "manage_container_profile_record", "manage_location_profile_record", "import_records",
+                                                 "update_assessment_record", "delete_assessment_record", "create_job", "cancel_job",
+                                                 "update_enumeration_record", "manage_enumeration_record"]
                        },
                        {
                          :group_code => "repository-project-managers",
                          :description => "Project managers of the #{repo_code} repository",
                          :grants_permissions => ["view_repository", "update_accession_record", "update_resource_record",
                                                  "update_digital_object_record", "update_event_record", "update_subject_record",
-                                                 "update_agent_record", "delete_archival_record", "suppress_archival_record",
-                                                 "manage_subject_record", "manage_agent_record", "manage_vocabulary_record",
-                                                 "import_records", 'merge_agents_and_subjects']
+                                                 "update_agent_record", "update_container_record",
+                                                 "update_container_profile_record", "update_location_profile_record",
+                                                 "delete_archival_record", "suppress_archival_record",
+                                                 "manage_subject_record", "manage_agent_record", "view_agent_contact_record", "manage_vocabulary_record",
+                                                 "manage_container_record", "manage_container_profile_record",
+                                                 "manage_location_profile_record", "import_records", 'merge_agents_and_subjects',
+                                                 "update_assessment_record", "delete_assessment_record", "update_enumeration_record",
+                                                 "manage_enumeration_record"]
                        },
                        {
                          :group_code => "repository-advanced-data-entry",
                          :description => "Advanced Data Entry users of the #{repo_code} repository",
                          :grants_permissions => ["view_repository", "update_accession_record", "update_resource_record",
                                                  "update_digital_object_record", "update_event_record", "update_subject_record",
-                                                 "update_agent_record", "manage_subject_record", "manage_agent_record",
-                                                 "manage_vocabulary_record", "import_records"]
+                                                 "update_agent_record", "update_container_record",
+                                                 "update_container_profile_record", "update_location_profile_record",
+                                                 "manage_subject_record", "manage_agent_record",
+                                                 "manage_vocabulary_record", "manage_container_record",
+                                                 "manage_container_profile_record", "manage_location_profile_record",
+                                                 "import_records", "update_assessment_record", "delete_assessment_record",
+                                                 "update_enumeration_record", "manage_enumeration_record"]
                        },
                        {
                          :group_code => "repository-basic-data-entry",
                          :description => "Basic Data Entry users of the #{repo_code} repository",
                          :grants_permissions => ["view_repository", "update_accession_record", "update_resource_record",
-                                                 "update_digital_object_record"]
+                                                 "update_digital_object_record", "create_job"]
                        },
                        {
                          :group_code => "repository-viewers",
@@ -95,7 +127,7 @@ class Repository < Sequel::Model(:repository)
 
 
   def delete
-   
+
     # this is very expensive...probably need to come up with something
     # better...
     [ Classification, Event, Resource, DigitalObject, Accession ].each do |klass|
@@ -135,6 +167,35 @@ class Repository < Sequel::Model(:repository)
 
   def display_string
     "#{name} (#{repo_code})"
+  end
+
+
+  def update_from_json(json, opts = {}, apply_nested_records = true)
+    reindex_required = self.publish != (json['publish'] ? 1 : 0)
+    classification_reindex_required = self.name != json['name']
+
+    result = super
+
+    if reindex_required
+      reindex_repository_records
+    elsif classification_reindex_required
+      reindex_classification_records
+    end
+
+    result
+  end
+
+  def reindex_repository_records
+    ASModel.all_models.each do |model|
+      if model.model_scope(true) == :repository && model.publishable?
+        model.update_mtime_for_repo_id(self.id)
+      end
+    end
+  end
+
+  def reindex_classification_records
+    ClassificationTerm.update_mtime_for_repo_id(self.id)
+    Classification.update_mtime_for_repo_id(self.id)
   end
 
 end

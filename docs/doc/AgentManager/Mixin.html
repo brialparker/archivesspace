@@ -6,7 +6,7 @@
 <title>
   Module: AgentManager::Mixin
   
-    &mdash; Documentation by YARD 0.9.0
+    &mdash; Documentation by YARD 0.9.20
   
 </title>
 
@@ -28,7 +28,7 @@
   </head>
   <body>
     <div class="nav_wrap">
-      <iframe id="nav" src="../class_list.html"></iframe>
+      <iframe id="nav" src="../class_list.html?1"></iframe>
       <div id="resizer"></div>
     </div>
 
@@ -36,7 +36,7 @@
       <div id="header">
         <div id="menu">
   
-    <a href="../_index.html">Index (M)</a> &raquo;
+    <a href="../alpha_index.html">Index (M)</a> &raquo;
     <span class='title'><span class='object_link'><a href="../AgentManager.html" title="AgentManager (module)">AgentManager</a></span></span>
      &raquo; 
     <span class="title">Mixin</span>
@@ -58,8 +58,6 @@
 </div>
         <div class="clear"></div>
       </div>
-
-      <iframe id="search_frame" src="../class_list.html"></iframe>
 
       <div id="content"><h1>Module: AgentManager::Mixin
   
@@ -166,7 +164,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Generally we won&#8217;t hit this because records are created using create_from_json.</p>
+    <span class="summary_desc"><div class='inline'><p>Generally we won’t hit this because records are created using create_from_json.</p>
 </div></span>
   
 </li>
@@ -265,8 +263,6 @@
       <pre class="lines">
 
 
-45
-46
 47
 48
 49
@@ -280,10 +276,11 @@
 57
 58
 59
-60</pre>
+60
+61</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/agent_manager.rb', line 45</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/agent_manager.rb', line 47</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_included identifier id'>included</span><span class='lparen token'>(</span><span class='rubyid_base identifier id'>base</span><span class='rparen token'>)</span>
   <span class='rubyid_base identifier id'>base</span><span class='dot token'>.</span><span class='rubyid_extend identifier id'>extend</span><span class='lparen token'>(</span><span class='rubyid_ClassMethods constant id'>ClassMethods</span><span class='rparen token'>)</span>
@@ -291,7 +288,6 @@
 
   <span class='rubyid_base identifier id'>base</span><span class='dot token'>.</span><span class='rubyid_include identifier id'>include</span><span class='lparen token'>(</span><span class='rubyid_Relationships constant id'>Relationships</span><span class='rparen token'>)</span>
   <span class='rubyid_base identifier id'>base</span><span class='dot token'>.</span><span class='rubyid_include identifier id'>include</span><span class='lparen token'>(</span><span class='rubyid_RelatedAgents constant id'>RelatedAgents</span><span class='rparen token'>)</span>
-  <span class='rubyid_base identifier id'>base</span><span class='dot token'>.</span><span class='rubyid_include identifier id'>include</span><span class='lparen token'>(</span><span class='rubyid_ImpliedPublication constant id'>ImpliedPublication</span><span class='rparen token'>)</span>
   <span class='rubyid_base identifier id'>base</span><span class='dot token'>.</span><span class='rubyid_include identifier id'>include</span><span class='lparen token'>(</span><span class='rubyid_Events constant id'>Events</span><span class='rparen token'>)</span>
 
   <span class='rubyid_ArchivesSpaceService constant id'>ArchivesSpaceService</span><span class='dot token'>.</span><span class='rubyid_loaded_hook identifier id'>loaded_hook</span> <span class='rubyid_do do kw'>do</span>
@@ -324,7 +320,7 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Generally we won&#8217;t hit this because records are created using
+    <p>Generally we won’t hit this because records are created using
 create_from_json.  But just to keep the tests happy.</p>
 
 
@@ -339,16 +335,16 @@ create_from_json.  But just to keep the tests happy.</p>
       <pre class="lines">
 
 
-81
 82
 83
 84
 85
 86
-87</pre>
+87
+88</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/agent_manager.rb', line 81</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/agent_manager.rb', line 82</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_before_save identifier id'>before_save</span>
   <span class='rubyid_if if kw'>if</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_agent_sha1 identifier id'>agent_sha1</span><span class='dot token'>.</span><span class='rubyid_nil? fid id'>nil?</span>
@@ -378,7 +374,6 @@ create_from_json.  But just to keep the tests happy.</p>
       <pre class="lines">
 
 
-100
 101
 102
 103
@@ -386,10 +381,11 @@ create_from_json.  But just to keep the tests happy.</p>
 105
 106
 107
-108</pre>
+108
+109</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/agent_manager.rb', line 100</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/agent_manager.rb', line 101</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_linked_agent_roles identifier id'>linked_agent_roles</span>
   <span class='rubyid_role_ids identifier id'>role_ids</span> <span class='assign token'>=</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_class identifier id'>class</span><span class='dot token'>.</span><span class='rubyid_find_relationship identifier id'>find_relationship</span><span class='lparen token'>(</span><span class='symbol val'>:linked_agents</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='rubyid_values_for_property identifier id'>values_for_property</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='comma token'>,</span> <span class='symbol val'>:role_id</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='rubyid_uniq identifier id'>uniq</span>
@@ -421,7 +417,6 @@ create_from_json.  But just to keep the tests happy.</p>
       <pre class="lines">
 
 
-63
 64
 65
 66
@@ -434,17 +429,18 @@ create_from_json.  But just to keep the tests happy.</p>
 73
 74
 75
-76</pre>
+76
+77</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/agent_manager.rb', line 63</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/agent_manager.rb', line 64</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_update_from_json identifier id'>update_from_json</span><span class='lparen token'>(</span><span class='rubyid_json identifier id'>json</span><span class='comma token'>,</span> <span class='rubyid_opts identifier id'>opts</span> <span class='assign token'>=</span> <span class='lbrace token'>{</span><span class='rbrace token'>}</span><span class='comma token'>,</span> <span class='rubyid_apply_nested_records identifier id'>apply_nested_records</span> <span class='assign token'>=</span> <span class='rubyid_true true kw'>true</span><span class='rparen token'>)</span>
   <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_class identifier id'>class</span><span class='dot token'>.</span><span class='rubyid_ensure_authorized_name identifier id'>ensure_authorized_name</span><span class='lparen token'>(</span><span class='rubyid_json identifier id'>json</span><span class='rparen token'>)</span>
   <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_class identifier id'>class</span><span class='dot token'>.</span><span class='rubyid_ensure_display_name identifier id'>ensure_display_name</span><span class='lparen token'>(</span><span class='rubyid_json identifier id'>json</span><span class='rparen token'>)</span>
   <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_class identifier id'>class</span><span class='dot token'>.</span><span class='rubyid_combine_unauthorized_names identifier id'>combine_unauthorized_names</span><span class='lparen token'>(</span><span class='rubyid_json identifier id'>json</span><span class='rparen token'>)</span>
 
-  <span class='comment val'># Force validation to make sure we're left with a valid record after our</span>
+  <span class='comment val'># Force validation to make sure we&#39;re left with a valid record after our</span>
   <span class='comment val'># changes</span>
   <span class='rubyid_json identifier id'>json</span><span class='dot token'>.</span><span class='rubyid_to_hash identifier id'>to_hash</span>
 
@@ -474,21 +470,21 @@ create_from_json.  But just to keep the tests happy.</p>
       <pre class="lines">
 
 
-90
 91
 92
 93
 94
 95
 96
-97</pre>
+97
+98</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/agent_manager.rb', line 90</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/agent_manager.rb', line 91</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_validate identifier id'>validate</span>
   <span class='rubyid_super super kw'>super</span>
-  <span class='rubyid_validates_unique identifier id'>validates_unique</span><span class='lparen token'>(</span><span class='lbrack token'>[</span><span class='symbol val'>:agent_sha1</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='symbol val'>:message</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='string val'>&quot;Agent must be unique&quot;</span><span class='rparen token'>)</span>
+  <span class='rubyid_validates_unique identifier id'>validates_unique</span><span class='lparen token'>(</span><span class='lbrack token'>[</span><span class='symbol val'>:agent_sha1</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='symbol val'>:message</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_AGENT_MUST_BE_UNIQUE constant id'>AGENT_MUST_BE_UNIQUE</span><span class='rparen token'>)</span>
   <span class='rubyid_map_validation_to_json_property identifier id'>map_validation_to_json_property</span><span class='lparen token'>(</span><span class='lbrack token'>[</span><span class='symbol val'>:agent_sha1</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='symbol val'>:names</span><span class='rparen token'>)</span>
   <span class='rubyid_map_validation_to_json_property identifier id'>map_validation_to_json_property</span><span class='lparen token'>(</span><span class='lbrack token'>[</span><span class='symbol val'>:agent_sha1</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='symbol val'>:dates_of_existence</span><span class='rparen token'>)</span>
   <span class='rubyid_map_validation_to_json_property identifier id'>map_validation_to_json_property</span><span class='lparen token'>(</span><span class='lbrack token'>[</span><span class='symbol val'>:agent_sha1</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='symbol val'>:external_documents</span><span class='rparen token'>)</span>
@@ -505,10 +501,11 @@ create_from_json.  But just to keep the tests happy.</p>
 </div>
 
       <div id="footer">
-  ArchivesSpace Version 20160724-1252 Documentation Generated on Thu Jul 28 18:04:45 2016 by
+  ArchivesSpace Version v2.7.0.a Documentation Generated on Tue Oct  8 14:03:42 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.0 (ruby-1.9.3).
+  0.9.20.
 </div>
+
     </div>
   </body>
 </html>

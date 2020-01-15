@@ -151,17 +151,45 @@ module JSONModel::Validations
   end
 
 
+  def self.check_language(hash)
+    langs = hash['lang_materials'].map {|l| l['language_and_script']}.compact.reject {|e|  e == [] }.flatten
+
+    errors = []
+
+    if langs == []
+      errors << :must_contain_at_least_one_language
+    end
+
+    errors
+  end
+
+  if JSONModel(:resource)
+    JSONModel(:resource).add_validation("check_language") do |hash|
+      check_language(hash)
+    end
+  end
+
+
   def self.check_rights_statement(hash)
     errors = []
 
-    if hash["rights_type"] == "intellectual_property"
-      errors << ["ip_status", "missing required property"] if hash["ip_status"].nil?
+    if hash["rights_type"] == "copyright"
+      errors << ["status", "missing required property"] if hash["status"].nil?
       errors << ["jurisdiction", "missing required property"] if hash["jurisdiction"].nil?
+      errors << ["start_date", "missing required property"] if hash["start_date"].nil?
+
     elsif hash["rights_type"] == "license"
-      errors << ["license_identifier_terms", "missing required property"] if hash["license_identifier_terms"].nil?
+      errors << ["license_terms", "missing required property"] if hash["license_terms"].nil?
+      errors << ["start_date", "missing required property"] if hash["start_date"].nil?
+
     elsif hash["rights_type"] == "statute"
       errors << ["statute_citation", "missing required property"] if hash["statute_citation"].nil?
       errors << ["jurisdiction", "missing required property"] if hash["jurisdiction"].nil?
+      errors << ["start_date", "missing required property"] if hash["start_date"].nil?
+
+    elsif hash["rights_type"] == "other"
+      errors << ["other_rights_basis", "missing required property"] if hash["other_rights_basis"].nil?
+      errors << ["start_date", "missing required property"] if hash["start_date"].nil?
     end
 
     errors
@@ -217,64 +245,20 @@ module JSONModel::Validations
   end
 
 
-  def self.check_container(hash)
-    errors = []
-    got_current = false
-    
-    required_container_fields = [["barcode_1"],
-                                ["type_1", "indicator_1"]]
-
-    if !required_container_fields.any? { |fieldset| fieldset.all? {|field| hash[field]} }
-      errors << [ :type_1, "either type_1 or barcode is required" ]
-    end
-
-    if !hash["container_extent_number"].nil? and hash["container_extent_number"] !~ /^\-?\d{0,9}(\.\d{1,5})?$/
-      errors << ["container_extent", "must be a number with no more than nine digits and five decimal places"]
-    elsif !hash["container_extent"].nil? and hash["container_extent_type"].nil?
-      errors << ["container_extent_type", "is required if container extent is specified "]
-    end
-
-    Array(hash["container_locations"]).each do |loc|
-      if loc["status"] == "current"
-        if got_current
-          errors << ["container_locations", "only one location can be current"]
-          break
-        else
-          got_current = true
-        end
-      end
-    end
-
-    errors
-  end
-
-
-  if JSONModel(:container)
-    JSONModel(:container).add_validation("check_container") do |hash|
-      check_container(hash)
-    end
-  end
-
-
-  def self.check_instance_pre_managed_container(hash)
+  def self.check_instance(hash)
     errors = []
 
     if hash["instance_type"] == "digital_object"
       errors << ["digital_object", "Can't be empty"] if hash["digital_object"].nil?
 
+    elsif hash["digital_object"] && hash["instance_type"] != "digital_object"
+      errors << ["instance_type", "An instance with a digital object reference must be of type 'digital_object'"]
+
     elsif hash["instance_type"]
-      errors << ["container", "Can't be empty"] if hash["container"].nil?
+      errors << ["sub_container", "Can't be empty"] if hash["sub_container"].nil?
     end
 
     errors
-  end
-    
-  def self.check_instance(hash)
-      if hash['sub_container']
-        []
-      else
-        check_instance_pre_managed_container(hash)
-      end
   end
 
 
@@ -314,7 +298,7 @@ module JSONModel::Validations
 
       # Ensure depth, width and height have no more than 2 decimal places
       ["depth", "width", "height"].each do |k|
-        if hash[k] !~  /^\s*(?=.*[0-9])\d*(?:\.\d{1,2})?\s*$/   
+        if hash[k] !~  /^\s*(?=.*[0-9])\d*(?:\.\d{1,2})?\s*$/
           errors << [k, "must be a number with no more than 2 decimal places"]
         end
       end
@@ -340,7 +324,7 @@ module JSONModel::Validations
     if !hash["processing_total_extent"].nil? and hash["processing_total_extent_type"].nil?
       errors << ["processing_total_extent_type", "is required if total extent is specified"]
     end
-    
+
     [ "processing_hours_per_foot_estimate", "processing_total_extent", "processing_hours_total"  ].each do |k|
         if !hash[k].nil? and hash[k] !~ /^\-?\d{0,9}(\.\d{1,5})?$/
                   errors << [k, "must be a number with no more than nine digits and five decimal places"]
@@ -524,4 +508,110 @@ module JSONModel::Validations
     end
   end
 
+
+  def self.check_field_query(hash)
+    errors = []
+
+    if (!hash.has_key?("value") || hash["value"].empty?) && hash["comparator"] != "empty"
+      errors << ["value", "Must specify either a value or use the 'empty' comparator"]
+    end
+
+    errors
+  end
+
+  if JSONModel(:field_query)
+    JSONModel(:field_query).add_validation("check_field_query") do |hash|
+      check_field_query(hash)
+    end
+  end
+
+
+  def self.check_date_field_query(hash)
+    errors = []
+
+    if (!hash.has_key?("value") || hash["value"].empty?) && hash["comparator"] != "empty"
+      errors << ["value", "Must specify either a value or use the 'empty' comparator"]
+    end
+
+    errors
+  end
+
+  if JSONModel(:date_field_query)
+    JSONModel(:date_field_query).add_validation("check_date_field_query") do |hash|
+      check_field_query(hash)
+    end
+  end
+
+  def self.check_rights_statement_external_document(hash)
+    errors = []
+
+    errors << ['identifier_type', 'missing required property'] if hash['identifier_type'].nil?
+
+    errors
+  end
+
+  if JSONModel(:rights_statement_external_document)
+    JSONModel(:rights_statement_external_document).add_validation("check_rights_statement_external_document") do |hash|
+      check_rights_statement_external_document(hash)
+    end
+  end
+
+
+  def self.check_assessment_monetary_value(hash)
+    errors = []
+
+    if monetary_value = hash['monetary_value']
+      unless monetary_value =~ /\A[0-9]+\z/ || monetary_value =~ /\A[0-9]+\.[0-9]{1,2}\z/
+        errors << ['monetary_value', "must be a number with no more than 2 decimal places"]
+      end
+    end
+
+    errors
+  end
+
+  if JSONModel(:assessment)
+    JSONModel(:assessment).add_validation("check_assessment_monetary_value") do |hash|
+      check_assessment_monetary_value(hash)
+    end
+  end
+
+  def self.check_survey_dates(hash)
+    errors = []
+
+    begin
+      begin_date = parse_sloppy_date(hash['survey_begin'])
+    rescue ArgumentError => e
+      errors << ["survey_begin", "not a valid date"]
+    end
+
+    begin
+      if hash['survey_end']
+        # If padding our end date with months/days would cause it to fall before
+        # the start date (e.g. if the start date was '2000-05' and the end date
+        # just '2000'), use the start date in place of end.
+        end_s = if begin_date && hash['survey_begin'] && hash['survey_begin'].start_with?(hash['survey_end'])
+                  hash['survey_begin']
+                else
+                  hash['survey_end']
+                end
+
+        end_date = parse_sloppy_date(end_s)
+      end
+    rescue ArgumentError
+      errors << ["survey_end", "not a valid date"]
+    end
+
+    if begin_date && end_date && end_date < begin_date
+      errors << ["survey_end", "must not be before begin"]
+    end
+
+    errors
+  end
+
+
+  if JSONModel(:assessment)
+    JSONModel(:assessment).add_validation("check_survey_dates") do |hash|
+      check_survey_dates(hash)
+    end
+  end
 end

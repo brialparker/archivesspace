@@ -35,9 +35,9 @@ describe 'Tree positioning' do
 
 
   it "gives a sensible initial ordering" do
-    @parent.position.should eq(0)
+    expect(@parent.position).to eq(0)
 
-    [@child1, @child2, @child3].map {|record| record.position}.should eq([0, 1, 2])
+    expect([@child1, @child2, @child3].map {|record| record.position}).to eq([0, 1, 2])
   end
 
 
@@ -47,7 +47,7 @@ describe 'Tree positioning' do
 
     refresh!
 
-    [@child1, @child2, @child3].sort_by(&:position).should eq([@child1, @child2, @child3])
+    expect([@child1, @child2, @child3].sort_by(&:position)).to eq([@child1, @child2, @child3])
   end
 
 
@@ -58,7 +58,7 @@ describe 'Tree positioning' do
 
     refresh!
 
-    [@child1, @child2, @child3].sort_by(&:position).should eq([@child2, @child3, @child1])
+    expect([@child1, @child2, @child3].sort_by(&:position)).to eq([@child2, @child3, @child1])
   end
 
 
@@ -69,7 +69,7 @@ describe 'Tree positioning' do
 
     refresh!
 
-    [@child1, @child2, @child3].sort_by(&:position).should eq([@child1, @child2, @child3])
+    expect([@child1, @child2, @child3].sort_by(&:position)).to eq([@child1, @child2, @child3])
 
   end
 
@@ -96,11 +96,11 @@ describe 'Tree positioning' do
     #
     # However, things go wrong when we take this position, load it into a
     # JSONModel and expose it through the API.  The API and frontend work with
-    # absolute positions, where setting a record to position = 2 always means
+    # logical positions, where setting a record to position = 2 always means
     # "this is the third item in the list".  If the frontend takes the second
     # record (with a position of '5' in the DB) and updates it, it passes
     # 'position = 5' back through to the backend.  The backend then assumes this
-    # '5' is an absolute '5', so it adjusts it to be relative to the other
+    # '5' is an logical '5', so it adjusts it to be relative to the other
     # numbers it has.  Since it appears that the frontend wanted the second
     # record to be moved to position 5, and since there are only three records,
     # it moves the record to the end of the list.
@@ -118,7 +118,7 @@ describe 'Tree positioning' do
 
     refresh!
 
-    [@child1, @child2, @child3].sort_by(&:position).should eq([@child3, @child2, @child1])
+    expect([@child1, @child2, @child3].sort_by(&:position)).to eq([@child3, @child2, @child1])
   end
 
 

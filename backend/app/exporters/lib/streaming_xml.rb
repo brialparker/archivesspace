@@ -14,7 +14,6 @@ module ASpaceExport
     def substitute_fragments(xml_string)
       @fragments.each do |id, fragment|
         xml_string.gsub!(/:aspace_fragment_#{id}/, fragment)
-        xml_string.gsub!(/[&]([^a])/, '&amp;\1')
       end
 
       xml_string
@@ -36,7 +35,6 @@ module ASpaceExport
       ":aspace_section_#{id}_"
     end
 
-
     def stream_out(doc, fragments, y, depth=0)
       xml_text = doc.to_xml(:encoding => 'utf-8')
 
@@ -52,7 +50,7 @@ module ASpaceExport
         next_section = queue.shift
         next_id = next_section.slice!(/^_(\w+)_/).gsub(/_/, '')
         next_fragments = RawXMLHandler.new
-        doc_frag = Nokogiri::XML::DocumentFragment.parse ""
+        doc_frag = Nokogiri::XML::DocumentFragment.new(Nokogiri::XML::Document.new)
         Nokogiri::XML::Builder.with(doc_frag) do |xml|
           @sections[next_id].call(xml, next_fragments)
         end

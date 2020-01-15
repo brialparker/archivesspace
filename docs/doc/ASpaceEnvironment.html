@@ -6,7 +6,7 @@
 <title>
   Class: ASpaceEnvironment
   
-    &mdash; Documentation by YARD 0.9.0
+    &mdash; Documentation by YARD 0.9.20
   
 </title>
 
@@ -28,7 +28,7 @@
   </head>
   <body>
     <div class="nav_wrap">
-      <iframe id="nav" src="class_list.html"></iframe>
+      <iframe id="nav" src="class_list.html?1"></iframe>
       <div id="resizer"></div>
     </div>
 
@@ -36,7 +36,7 @@
       <div id="header">
         <div id="menu">
   
-    <a href="_index.html">Index (A)</a> &raquo;
+    <a href="alpha_index.html">Index (A)</a> &raquo;
     
     
     <span class="title">ASpaceEnvironment</span>
@@ -58,8 +58,6 @@
 </div>
         <div class="clear"></div>
       </div>
-
-      <iframe id="search_frame" src="class_list.html"></iframe>
 
       <div id="content"><h1>Class: ASpaceEnvironment
   
@@ -100,6 +98,8 @@
   </dl>
   
 </div>
+
+
 
 
 
@@ -278,12 +278,12 @@
       <pre class="lines">
 
 
-60
-61
-62</pre>
+66
+67
+68</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/lib/bootstrap.rb', line 60</span>
+      <pre class="code"><span class="info file"># File 'backend/app/lib/bootstrap.rb', line 66</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_demo_db? fid id'>demo_db?</span>
   <span class='rubyid_AppConfig constant id'>AppConfig</span><span class='lbrack token'>[</span><span class='symbol val'>:db_url</span><span class='rbrack token'>]</span> <span class='match op'>=~</span> <span class='regexp val'>/aspacedemo=true/</span>
@@ -309,12 +309,6 @@
       <pre class="lines">
 
 
-64
-65
-66
-67
-68
-69
 70
 71
 72
@@ -338,35 +332,41 @@
 90
 91
 92
-93</pre>
+93
+94
+95
+96
+97
+98
+99</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/lib/bootstrap.rb', line 64</span>
+      <pre class="code"><span class="info file"># File 'backend/app/lib/bootstrap.rb', line 70</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_download_demo_db identifier id'>download_demo_db</span>
 
-  <span class='rubyid_if if kw'>if</span> <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_exists? fid id'>exists?</span><span class='lparen token'>(</span><span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span><span class='rubyid_Dir constant id'>Dir</span><span class='dot token'>.</span><span class='rubyid_tmpdir identifier id'>tmpdir</span><span class='comma token'>,</span> <span class='string val'>'data'</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
-    <span class='rubyid_puts identifier id'>puts</span> <span class='dstring node'>&quot;Data directory already exists at #{File.join(Dir.tmpdir, 'data')}.&quot;</span>
-    <span class='rubyid_AppConfig constant id'>AppConfig</span><span class='lbrack token'>[</span><span class='symbol val'>:data_directory</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span><span class='rubyid_Dir constant id'>Dir</span><span class='dot token'>.</span><span class='rubyid_tmpdir identifier id'>tmpdir</span><span class='comma token'>,</span> <span class='string val'>'data'</span><span class='rparen token'>)</span>
+  <span class='rubyid_if if kw'>if</span> <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_exist? fid id'>exist?</span><span class='lparen token'>(</span><span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span><span class='rubyid_Dir constant id'>Dir</span><span class='dot token'>.</span><span class='rubyid_tmpdir identifier id'>tmpdir</span><span class='comma token'>,</span> <span class='string val'>&#39;data&#39;</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+    <span class='rubyid_puts identifier id'>puts</span> <span class='dstring node'>&quot;Data directory already exists at #{File.join(Dir.tmpdir, &#39;data&#39;)}.&quot;</span>
+    <span class='rubyid_AppConfig constant id'>AppConfig</span><span class='lbrack token'>[</span><span class='symbol val'>:data_directory</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span><span class='rubyid_Dir constant id'>Dir</span><span class='dot token'>.</span><span class='rubyid_tmpdir identifier id'>tmpdir</span><span class='comma token'>,</span> <span class='string val'>&#39;data&#39;</span><span class='rparen token'>)</span>
     <span class='rubyid_return return kw'>return</span>
   <span class='rubyid_end end kw'>end</span>
 
   <span class='rubyid_zip_file identifier id'>zip_file</span> <span class='assign token'>=</span> <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span> <span class='rubyid_Dir constant id'>Dir</span><span class='dot token'>.</span><span class='rubyid_tmpdir identifier id'>tmpdir</span><span class='comma token'>,</span> <span class='string val'>&quot;archivesspace_demo_data.zip&quot;</span><span class='rparen token'>)</span>
-  <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_open identifier id'>open</span><span class='lparen token'>(</span> <span class='rubyid_zip_file identifier id'>zip_file</span><span class='comma token'>,</span> <span class='string val'>'wb'</span> <span class='rparen token'>)</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_file identifier id'>file</span><span class='bitor op'>|</span>
+  <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_open identifier id'>open</span><span class='lparen token'>(</span> <span class='rubyid_zip_file identifier id'>zip_file</span><span class='comma token'>,</span> <span class='string val'>&#39;wb&#39;</span> <span class='rparen token'>)</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_file identifier id'>file</span><span class='bitor op'>|</span>
     <span class='rubyid_puts identifier id'>puts</span> <span class='dstring node'>&quot;Attempting to download data from #{AppConfig[:demo_data_url]}&quot;</span>
-    <span class='rubyid_open identifier id'>open</span><span class='lparen token'>(</span><span class='rubyid_AppConfig constant id'>AppConfig</span><span class='lbrack token'>[</span><span class='symbol val'>:demo_data_url</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='string val'>'rb'</span><span class='rparen token'>)</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_zip identifier id'>zip</span><span class='bitor op'>|</span>
+    <span class='rubyid_open identifier id'>open</span><span class='lparen token'>(</span><span class='rubyid_AppConfig constant id'>AppConfig</span><span class='lbrack token'>[</span><span class='symbol val'>:demo_data_url</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='string val'>&#39;rb&#39;</span><span class='rparen token'>)</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_zip identifier id'>zip</span><span class='bitor op'>|</span>
       <span class='rubyid_file identifier id'>file</span><span class='dot token'>.</span><span class='rubyid_write identifier id'>write</span><span class='lparen token'>(</span><span class='rubyid_zip identifier id'>zip</span><span class='dot token'>.</span><span class='rubyid_read identifier id'>read</span><span class='rparen token'>)</span>
     <span class='rubyid_end end kw'>end</span>
   <span class='rubyid_end end kw'>end</span>
 
-  <span class='rubyid_if if kw'>if</span> <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_exists? fid id'>exists?</span><span class='lparen token'>(</span><span class='rubyid_zip_file identifier id'>zip_file</span><span class='rparen token'>)</span>
+  <span class='rubyid_if if kw'>if</span> <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_exist? fid id'>exist?</span><span class='lparen token'>(</span><span class='rubyid_zip_file identifier id'>zip_file</span><span class='rparen token'>)</span>
     <span class='rubyid_puts identifier id'>puts</span> <span class='dstring node'>&quot;Extracting data to #{Dir.tmpdir} directory&quot;</span>
     <span class='rubyid_Zip constant id'>Zip</span><span class='colon2 op'>::</span><span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_open identifier id'>open</span><span class='lparen token'>(</span><span class='rubyid_zip_file identifier id'>zip_file</span><span class='rparen token'>)</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_zf identifier id'>zf</span><span class='bitor op'>|</span>
       <span class='rubyid_zf identifier id'>zf</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_entry identifier id'>entry</span><span class='bitor op'>|</span>
         <span class='rubyid_entry identifier id'>entry</span><span class='dot token'>.</span><span class='rubyid_extract identifier id'>extract</span><span class='lparen token'>(</span><span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span><span class='rubyid_Dir constant id'>Dir</span><span class='dot token'>.</span><span class='rubyid_tmpdir identifier id'>tmpdir</span><span class='comma token'>,</span> <span class='rubyid_entry identifier id'>entry</span><span class='dot token'>.</span><span class='rubyid_name identifier id'>name</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
       <span class='rubyid_end end kw'>end</span>
     <span class='rubyid_end end kw'>end</span>
-    <span class='rubyid_AppConfig constant id'>AppConfig</span><span class='lbrack token'>[</span><span class='symbol val'>:data_directory</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span><span class='rubyid_Dir constant id'>Dir</span><span class='dot token'>.</span><span class='rubyid_tmpdir identifier id'>tmpdir</span><span class='comma token'>,</span> <span class='string val'>'data'</span><span class='rparen token'>)</span>
+    <span class='rubyid_AppConfig constant id'>AppConfig</span><span class='lbrack token'>[</span><span class='symbol val'>:data_directory</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='rubyid_File constant id'>File</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span><span class='rubyid_Dir constant id'>Dir</span><span class='dot token'>.</span><span class='rubyid_tmpdir identifier id'>tmpdir</span><span class='comma token'>,</span> <span class='string val'>&#39;data&#39;</span><span class='rparen token'>)</span>
   <span class='rubyid_else else kw'>else</span>
       <span class='rubyid_puts identifier id'>puts</span> <span class='string val'>&quot;\n************************************************************************\n*\n*   WARNING: Unable to download demo data. Using database defined in config\n*\n************************************************************************\n&quot;</span>
   <span class='rubyid_end end kw'>end</span>
@@ -394,12 +394,12 @@
       <pre class="lines">
 
 
-35
-36
-37</pre>
+40
+41
+42</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/lib/bootstrap.rb', line 35</span>
+      <pre class="code"><span class="info file"># File 'backend/app/lib/bootstrap.rb', line 40</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_environment identifier id'>environment</span>
   <span class='rubyid_@environment ivar id'>@environment</span>
@@ -425,11 +425,6 @@
       <pre class="lines">
 
 
-40
-41
-42
-43
-44
 45
 46
 47
@@ -442,17 +437,24 @@
 54
 55
 56
-57</pre>
+57
+58
+59
+60
+61
+62
+63</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/lib/bootstrap.rb', line 40</span>
+      <pre class="code"><span class="info file"># File 'backend/app/lib/bootstrap.rb', line 45</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_init identifier id'>init</span><span class='lparen token'>(</span><span class='rubyid_environment identifier id'>environment</span> <span class='assign token'>=</span> <span class='symbol val'>:auto</span><span class='rparen token'>)</span>
   <span class='rubyid_return return kw'>return</span> <span class='rubyid_if if_mod kw'>if</span> <span class='rubyid_@environment ivar id'>@environment</span>      <span class='comment val'># Already initialised</span>
 
   <span class='rubyid_if if kw'>if</span> <span class='rubyid_environment identifier id'>environment</span> <span class='neq op'>!=</span> <span class='symbol val'>:auto</span>
     <span class='rubyid_@environment ivar id'>@environment</span> <span class='assign token'>=</span> <span class='rubyid_environment identifier id'>environment</span>
-  <span class='rubyid_elsif elsif kw'>elsif</span> <span class='rubyid_ENV constant id'>ENV</span><span class='lbrack token'>[</span><span class='string val'>&quot;ASPACE_DEMO&quot;</span><span class='rbrack token'>]</span> <span class='eq op'>==</span> <span class='string val'>'true'</span>
+  <span class='rubyid_elsif elsif kw'>elsif</span> <span class='rubyid_ENV constant id'>ENV</span><span class='lbrack token'>[</span><span class='string val'>&quot;ASPACE_DEMO&quot;</span><span class='rbrack token'>]</span> <span class='eq op'>==</span> <span class='string val'>&#39;true&#39;</span>
+    <span class='comment val'># to use this mechanism, put URL to demo database in AppConfig[:demo_data_url]</span>
     <span class='rubyid_download_demo_db identifier id'>download_demo_db</span>
     <span class='rubyid_@environment ivar id'>@environment</span> <span class='assign token'>=</span> <span class='symbol val'>:production</span>
   <span class='rubyid_else else kw'>else</span>
@@ -486,12 +488,6 @@
       <pre class="lines">
 
 
-103
-104
-105
-106
-107
-108
 109
 110
 111
@@ -508,10 +504,16 @@
 122
 123
 124
-125</pre>
+125
+126
+127
+128
+129
+130
+131</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/lib/bootstrap.rb', line 103</span>
+      <pre class="code"><span class="info file"># File 'backend/app/lib/bootstrap.rb', line 109</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_prepare_database identifier id'>prepare_database</span>
   <span class='rubyid_if if kw'>if</span> <span class='rubyid_@environment ivar id'>@environment</span> <span class='eq op'>==</span> <span class='symbol val'>:integration</span> <span class='andop op'>&amp;&amp;</span> <span class='rubyid_demo_db? fid id'>demo_db?</span>
@@ -547,10 +549,11 @@
 </div>
 
       <div id="footer">
-  ArchivesSpace Version 20160724-1252 Documentation Generated on Thu Jul 28 18:04:53 2016 by
+  ArchivesSpace Version v2.7.0.a Documentation Generated on Tue Oct  8 14:03:49 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.0 (ruby-1.9.3).
+  0.9.20.
 </div>
+
     </div>
   </body>
 </html>

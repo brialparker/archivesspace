@@ -25,18 +25,20 @@ class Job < Sequel::Model(:job)
   class JobFileStore
 
     def initialize(name)
-      @job_path = File.join(AppConfig[:job_file_path], name)
+      @job_dir = name
+      @job_path = File.join(AppConfig[:job_file_path], @job_dir)
       FileUtils.mkdir_p(@job_path)
       @output_path = File.join(@job_path, "output.log")
     end
 
 
     def store(file)
-      target = File.join(@job_path, SecureRandom.hex)
+      filename = SecureRandom.hex
+      target = File.join(@job_path, filename)
 
       FileUtils.cp(file.path, target)
 
-      target
+      File.join(@job_dir, filename)
     end
 
 
@@ -69,6 +71,7 @@ class Job < Sequel::Model(:job)
       File.unlink(path)
     end
 
+
   end
 
 
@@ -76,9 +79,13 @@ class Job < Sequel::Model(:job)
     if json.job_params == "null" 
       json.job_params = ""
     end
-    
+
+    # force a validation on the job
+    job = JSONModel(json.job['jsonmodel_type'].intern).from_hash(json.job)
+
     super(json, opts.merge(:time_submitted => Time.now,
                            :owner_id => opts.fetch(:user).id,
+                           :job_type => json.job['jsonmodel_type'],
                            :job_blob => ASUtils.to_json(json.job),
                            :job_params => ASUtils.to_json(json.job_params) 
                           ))
@@ -88,17 +95,47 @@ class Job < Sequel::Model(:job)
   def self.sequel_to_jsonmodel(objs, opts = {})
     jsons = super
     jsons.zip(objs).each do |json, obj|
-      json.job = JSONModel(json.job_type.intern).from_json(obj.job_blob)
+      json.job = JSONModel(obj.type.intern).from_hash(obj.job)
       json.owner = obj.owner.username
-      json.queue_position = obj.queue_position if obj.status === "queued"
+      json.queue_position = obj.queue_position if obj.status === 'queued'
     end
 
     jsons
   end
 
 
+  def self.queued_jobs
+    self.any_repo.filter(:status => 'queued').order(:time_submitted)
+  end
+
+
+  def self.running_jobs
+    self.any_repo.filter(:status => 'running').order(:time_submitted)
+  end
+
+
+  def self.running_jobs_untouched_since(time)
+    self.any_repo.filter(:status => "running").where { system_mtime < time } 
+  end
+
+
+  def self.any_running?(type)
+    !self.any_repo.filter(:status => 'running').where(:job_type => type).empty?
+  end
+
+
+  def job
+    @job ||= ASUtils.json_parse(job_blob)
+  end
+
+
+  def type
+    self.job_type
+  end
+
+
   def file_store
-    @file_store ||= JobFileStore.new("#{job_type}_#{id}")
+    @file_store ||= JobFileStore.new("#{type}_#{id}")
   end
 
 
@@ -143,11 +180,18 @@ class Job < Sequel::Model(:job)
   end
 
 
-  def finish(status)
+  def start!
+    self.status = 'running'
+    self.time_started = Time.now
+    self.save
+  end
+
+
+  def finish!(status)
     file_store.close_output
 
     self.reload
-    self.status = "#{status}"
+    self.status = [:canceled, :failed].include?(status) ? status.to_s : 'completed'
     self.time_finished = Time.now
     self.save
   end

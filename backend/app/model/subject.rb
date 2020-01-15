@@ -1,6 +1,5 @@
 require_relative 'term'
 require 'digest/sha1'
-require_relative 'mixins/implied_publication'
 
 class Subject < Sequel::Model(:subject)
   include ASModel
@@ -9,8 +8,6 @@ class Subject < Sequel::Model(:subject)
   include ExternalDocuments
   include ExternalIDs
   include AutoGenerator
-  include Relationships
-  include ImpliedPublication
   include Publishable
 
   set_model_scope :global
@@ -42,6 +39,20 @@ class Subject < Sequel::Model(:subject)
                                   end
                                 end.join(" -- ")
                               }
+
+
+  auto_generate :property => :slug,
+                :generator => proc { |json|
+                  if AppConfig[:use_human_readable_urls]
+                    if json["is_slug_auto"]
+                      AppConfig[:auto_generate_slugs_with_id] ? 
+                        SlugHelpers.id_based_slug_for(json, Subject) : 
+                        SlugHelpers.name_based_slug_for(json, Subject)
+                    else
+                      json["slug"]
+                    end
+                  end
+                }
 
 
   def self.set_vocabulary(json, opts)
@@ -105,8 +116,21 @@ class Subject < Sequel::Model(:subject)
   def self.sequel_to_jsonmodel(objs, opts = {})
     jsons = super
 
+    if opts[:calculate_linked_repositories]
+      subjects_to_repositories = GlobalRecordRepositoryLinkages.new(self, :subject).call(objs)
+
+      jsons.zip(objs).each do |json, obj|
+        json.used_within_repositories = subjects_to_repositories.fetch(obj, []).map {|repo| repo.uri}
+        json.used_within_published_repositories = subjects_to_repositories.fetch(obj, []).select{|repo| repo.publish == 1}.map {|repo| repo.uri}
+      end
+    end
+
+
+    publication_status = ImpliedPublicationCalculator.new.for_subjects(objs)
+
     jsons.zip(objs).each do |json, obj|
       json.vocabulary = uri_for(:vocabulary, obj.vocab_id)
+      json.is_linked_to_published_record = publication_status.fetch(obj)
     end
 
     jsons

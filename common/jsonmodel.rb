@@ -4,6 +4,7 @@ require 'uri'
 require_relative 'jsonmodel_type'
 require_relative 'json_schema_concurrency_fix'
 require_relative 'json_schema_utils'
+require_relative 'jsonmodel_utils'
 require_relative 'asutils'
 require_relative 'validator_cache'
 
@@ -137,7 +138,7 @@ module JSONModel
 
       schema = File.join(dir, "#{schema_name}.rb")
 
-      if File.exists?(schema)
+      if File.exist?(schema)
         return File.open(schema).read
       end
     end
@@ -163,7 +164,6 @@ module JSONModel
 
   def self.load_schema(schema_name)
     if not @@models[schema_name]
-
       old_verbose = $VERBOSE
       $VERBOSE = nil
       src = schema_src(schema_name)
@@ -228,16 +228,43 @@ module JSONModel
       end
 
       ASUtils.find_local_directories("schemas/#{schema_name}_ext.rb").
-              select {|path| File.exists?(path)}.
+              select {|path| File.exist?(path)}.
               each do |schema_extension|
         entry[:schema]['properties'] = ASUtils.deep_merge(entry[:schema]['properties'],
                                                           eval(File.open(schema_extension).read))
       end
 
+      validate_schema(entry[:schema])
+
       self.create_model_for(schema_name, entry[:schema])
     end
   end
 
+  # Look for any obvious errors in our schema
+  def self.validate_schema(schema)
+    check_valid_refs(schema['properties'])
+    schema
+  end
+
+  def self.check_valid_refs(properties)
+    if properties.is_a?(Hash)
+      properties.each do |key, value|
+        if key == 'ref'
+          unless value.is_a?(Hash)
+            raise "ref value should be an object.  Got type: #{value.class}"
+          end
+        else
+          check_valid_refs(value)
+        end
+      end
+    elsif properties.is_a?(Array)
+      properties.each do |elt|
+        check_valid_refs(elt)
+      end
+    else
+      # Scalar...
+    end
+  end
 
   def self.init(opts = {})
 

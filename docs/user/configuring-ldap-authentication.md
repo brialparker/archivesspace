@@ -1,9 +1,8 @@
 ---
-title: Configuring LDAP authentication 
+title: Configuring LDAP authentication
 layout: en
-permalink: /user/configuring-ldap-authentication/ 
+permalink: /user/configuring-ldap-authentication/
 ---
-
 ArchivesSpace can manage its own user directory, but can also be
 configured to authenticate against one or more LDAP directories by
 specifying them in the application's configuration file.  When a user
@@ -23,7 +22,7 @@ Here is a minimal example of an LDAP configuration:
 
 With this configuration, ArchivesSpace performs authentication by
 connecting to `ldap://ldap.example.com:389/`, binding anonymously,
-searching the `ou=people,dc=example,dc=com` tree for `uid = <username>`. 
+searching the `ou=people,dc=example,dc=com` tree for `uid = <username>`.
 
 If the user is found, ArchivesSpace authenticates them by
 binding using the password specified.  Finally, the `:attribute_map`
@@ -65,5 +64,3 @@ appropriate and specify the `encryption` option:
                                              :bind_password => 'secretsquirrel',
                                              :encryption => :simple_tls,
      }]
-
-

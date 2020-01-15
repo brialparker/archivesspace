@@ -23,10 +23,10 @@ describe 'Managed Container mixin' do
     })
 
     instances = Accession.to_jsonmodel(accession.id).instances
-    instances.length.should eq(1)
-    instances[0]["sub_container"].should_not be_nil
-    instances[0]["sub_container"]["top_container"].should_not be_nil
-    instances[0]["sub_container"]["top_container"]["ref"].should eq(top_container_uri)
+    expect(instances.length).to eq(1)
+    expect(instances[0]["sub_container"]).not_to be_nil
+    expect(instances[0]["sub_container"]["top_container"]).not_to be_nil
+    expect(instances[0]["sub_container"]["top_container"]["ref"]).to eq(top_container_uri)
   end
 
 
@@ -35,7 +35,7 @@ describe 'Managed Container mixin' do
       create_accession({
                          "instances" => [build(:json_instance, {
                            "instance_type" => "accession",
-                           "sub_container" => build(:json_sub_container)
+                           "sub_container" => build(:json_sub_container, :top_container => nil)
                          })]
                        })
     }.to raise_error(JSONModel::ValidationException)

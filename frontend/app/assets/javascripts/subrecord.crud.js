@@ -38,7 +38,7 @@ $(function() {
           
 
           var addRemoveButton = function() {
-            var removeBtn = $("<a href='javascript:void(0)' class='btn btn-default btn-xs pull-right subrecord-form-remove'><span class='glyphicon glyphicon-remove'></span></a>");
+            var removeBtn = $("<a href='javascript:void(0)' class='btn btn-default btn-xs pull-right subrecord-form-remove' title='Remove sub-record' aria-label='Remove sub-record'><span class='glyphicon glyphicon-remove'></span></a>");
             $subform.prepend(removeBtn);
             removeBtn.on("click", function() {
               AS.confirmSubFormDelete($(this), function() {
@@ -84,7 +84,8 @@ $(function() {
 
           $.proxy(init_subform, formEl)();
 
-          //init any sub sub record forms
+          //init any sub sub record forms (treat note sub forms special, because they are)
+          $(".subrecord-form.notes-form:not(.initialised)", formEl).init_notes_form();
           $(".subrecord-form:not(.initialised)", formEl).init_subrecord_form();
 
           $(":input:first", formEl).focus();

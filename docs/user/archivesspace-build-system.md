@@ -1,10 +1,8 @@
 ---
-title: ArchivesSpace Build System 
+title: ArchivesSpace build system
 layout: en
-permalink: /user/archivesspace-build-system/ 
+permalink: /user/archivesspace-build-system/
 ---
-==========================
-
 ## Running the build system
 
 To run the build system, use the `build/run` script from your
@@ -22,8 +20,7 @@ The bootstrap task:
 Will bootstrap your development environment by downloading all
 dependencies--JRuby, Gems, Solr, etc..
 
-
-## Running a development environment
+## Running components individually
 
 To run a development instance of all ArchivesSpace components:
 
@@ -34,10 +31,57 @@ To run a development instance of all ArchivesSpace components:
 
 These should be run in different terminal sessions and do not need to be run
 in a specific order or are all required.
+
+## Running components all at once
+
+Use Supervisord for a simpler way of running the development servers with output 
+for all servers sent to a single terminal window.
+
+[Supervisord](http://supervisord.org/) can simultaneously launch the ArchivesSpace 
+development servers. This is entirely optional and just for developer convenience.
+
+From within the ArchivesSpace source directory:
+
+```
+./build/run bootstrap # if needed, as usual
+
+[sudo] pip install supervisor supervisor-stdout
+
+#run all of the services
+supervisord -c supervisord/archivesspace.conf
+
+#run in api mode (backend + indexer / solr only)
+supervisord -c supervisord/api.conf
+
+#run just the backend (useful for trying out endpoints that don't require Solr)
+supervisord -c supervisord/backend.conf
+
+To stop supervisord: `Ctrl-c`.
+
+```
+
+## Running with a MySQL backend
+
+To override configuration defaults create the file `common/config/config.rb`
+and set values as needed (restart the development servers). To use MySQL
+for development you can set the `db_url` in `common/config/config.rb` or set
+the `aspace.config.db_url` property of `JAVA_OPTS`:
+
+```
+export JAVA_OPTS="-Daspace.config.db_url=jdbc:mysql://127.0.0.1:3306/archivesspace?useUnicode=true&characterEncoding=UTF-8&user=as&password=as123"
+```
+
+See the [setup instructions](http://archivesspace.github.io/archivesspace/user/running-archivesspace-against-mysql/) for initializing the database.
+The MySQL connector should be downloaded to `common/lib`. If you restore a
+database to use in development it may not play well with the tests.
+
+After setting up and creating the database you can run the migrations with:
+
+     build/run db:migrate
+
 You can also clear your database and search indexes with:
 
      build/run db:nuke
-
 
 ## Running the tests
 
@@ -45,10 +89,8 @@ ArchivesSpace uses a combination of RSpec, integration and Selenium
 tests.  You will need to have Firefox on your path.  Then, to run all
 tests:
 
-     build/run test
+     build/run travis:test
 
-See also: selenium/README.md for more information on the Selenium
-tests.
 
 It's also useful to be able to run the backend unit tests separately.
 To do this, run:
@@ -77,15 +119,8 @@ directory in your ArchivesSpace project directory.
 
 ## Building a distribution
 
-To build an ArchivesSpace release, use the `build_release` script from
-your project directory:
-
-     scripts/build_release
+See: [Building an Archivesspace Release](http://archivesspace.github.io/archivesspace/user/building-an-archivesspace-release/) for information on building a distribution.
 
 ## Generating API documentation
 
-To generate documentation for backend endpoints:
-
-    build/run doc:yard
-
-The generated HTML will be placed in the `doc` directory in your archivesspace root.
+See: [Building an Archivesspace Release](http://archivesspace.github.io/archivesspace/user/building-an-archivesspace-release/) for information on building the documentation.

@@ -6,7 +6,7 @@
 <title>
   Class: SidebarHelper::SidebarGenerator
   
-    &mdash; Documentation by YARD 0.9.0
+    &mdash; Documentation by YARD 0.9.20
   
 </title>
 
@@ -28,7 +28,7 @@
   </head>
   <body>
     <div class="nav_wrap">
-      <iframe id="nav" src="../class_list.html"></iframe>
+      <iframe id="nav" src="../class_list.html?1"></iframe>
       <div id="resizer"></div>
     </div>
 
@@ -36,7 +36,7 @@
       <div id="header">
         <div id="menu">
   
-    <a href="../_index.html">Index (S)</a> &raquo;
+    <a href="../alpha_index.html">Index (S)</a> &raquo;
     <span class='title'><span class='object_link'><a href="../SidebarHelper.html" title="SidebarHelper (module)">SidebarHelper</a></span></span>
      &raquo; 
     <span class="title">SidebarGenerator</span>
@@ -58,8 +58,6 @@
 </div>
         <div class="clear"></div>
       </div>
-
-      <iframe id="search_frame" src="../class_list.html"></iframe>
 
       <div id="content"><h1>Class: SidebarHelper::SidebarGenerator
   
@@ -100,6 +98,8 @@
   </dl>
   
 </div>
+
+
 
 
 
@@ -469,8 +469,8 @@
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_show_external_ids_sidebar_entry? fid id'>show_external_ids_sidebar_entry?</span>
   <span class='rubyid_record identifier id'>record</span> <span class='assign token'>=</span> <span class='rubyid_@opts ivar id'>@opts</span><span class='lbrack token'>[</span><span class='symbol val'>:record</span><span class='rbrack token'>]</span>
 
-  <span class='rubyid_@form ivar id'>@form</span><span class='dot token'>.</span><span class='rubyid_controller identifier id'>controller</span><span class='dot token'>.</span><span class='rubyid_action_name identifier id'>action_name</span> <span class='eq op'>==</span> <span class='string val'>'show'</span> <span class='orop op'>||</span>
-    <span class='rubyid_@form ivar id'>@form</span><span class='dot token'>.</span><span class='rubyid_controller identifier id'>controller</span><span class='dot token'>.</span><span class='rubyid_action_name identifier id'>action_name</span> <span class='neq op'>!=</span> <span class='string val'>'show'</span> <span class='andop op'>&amp;&amp;</span> <span class='notop op'>!</span><span class='rubyid_ASUtils constant id'>ASUtils</span><span class='dot token'>.</span><span class='rubyid_wrap identifier id'>wrap</span><span class='lparen token'>(</span><span class='rubyid_record identifier id'>record</span><span class='lbrack token'>[</span><span class='string val'>'external_ids'</span><span class='rbrack token'>]</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='rubyid_empty? fid id'>empty?</span>
+  <span class='rubyid_@form ivar id'>@form</span><span class='dot token'>.</span><span class='rubyid_controller identifier id'>controller</span><span class='dot token'>.</span><span class='rubyid_action_name identifier id'>action_name</span> <span class='eq op'>==</span> <span class='string val'>&#39;show&#39;</span> <span class='orop op'>||</span>
+    <span class='rubyid_@form ivar id'>@form</span><span class='dot token'>.</span><span class='rubyid_controller identifier id'>controller</span><span class='dot token'>.</span><span class='rubyid_action_name identifier id'>action_name</span> <span class='neq op'>!=</span> <span class='string val'>&#39;show&#39;</span> <span class='andop op'>&amp;&amp;</span> <span class='notop op'>!</span><span class='rubyid_ASUtils constant id'>ASUtils</span><span class='dot token'>.</span><span class='rubyid_wrap identifier id'>wrap</span><span class='lparen token'>(</span><span class='rubyid_record identifier id'>record</span><span class='lbrack token'>[</span><span class='string val'>&#39;external_ids&#39;</span><span class='rbrack token'>]</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='rubyid_empty? fid id'>empty?</span>
 <span class='rubyid_end end kw'>end</span>
 </pre>
     </td>
@@ -483,10 +483,11 @@
 </div>
 
       <div id="footer">
-  ArchivesSpace Version 20160724-1252 Documentation Generated on Thu Jul 28 18:05:05 2016 by
+  ArchivesSpace Version v2.7.0.a Documentation Generated on Tue Oct  8 14:04:00 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.0 (ruby-1.9.3).
+  0.9.20.
 </div>
+
     </div>
   </body>
 </html>

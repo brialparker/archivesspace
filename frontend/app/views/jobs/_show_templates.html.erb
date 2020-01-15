@@ -35,10 +35,12 @@
 
     <%= form.label_with_field "import_type", job['import_type'] %>
 
-    <div class="form-group">
-      <label class="col-sm-3 control-label"><%= I18n.t("repository._singular") %></label>
-      <div class="col-sm-9 controls label-only"><%= resolve_readonly_link_to job.repository['_resolved']['repo_code'], job.repository['ref'] %></div>
-    </div>
+    <% if job["job_type"] != 'generate_slugs_job' && job["job_type"] != 'generate_arks_job' %>
+      <div class="form-group">
+        <label class="col-sm-3 control-label"><%= I18n.t("repository._singular") %></label>
+        <div class="col-sm-9 controls label-only"><%= resolve_readonly_link_to job.repository['_resolved']['repo_code'], job.repository['ref'] %></div>
+      </div>
+    <% end %>
 
     <div class="form-group">
       <label class="col-sm-3 control-label"><%= I18n.t("job.owner") %></label>
@@ -49,6 +51,16 @@
 
     <%= display_audit_info(@job) %>
   </section>
+<% end %>
+
+
+<% define_template "container_labels_job", jsonmodel_definition(:container_labels_job) do |form, job| %>
+
+    <div class="form-group">
+      <label class="col-sm-3 control-label"><%= I18n.t("actions.container_labels")  %></label>
+      <div class="col-sm-9 controls label-only"><%= job['source'] %></div>
+    </div>
+
 <% end %>
 
 
@@ -90,23 +102,32 @@
 
 <% end %>
 
-<% define_template "container_conversion_job", jsonmodel_definition(:container_conversion_job) do |form, job| %>
-
-    <div class="form-group">
-      <label class="col-sm-3 control-label"><%= I18n.t("actions.resource_to_pdf")  %></label>
-      <div class="col-sm-9 controls label-only"><%= job['source'] %></div>
-    </div>
-
-<% end %>
-
 <% define_template "report_job", jsonmodel_definition(:report_job) do |form, job| %>
 
     <div class="form-group">
-      <label class="col-sm-3 control-label"><%= I18n.t("actions.resource_to_pdf")  %></label>
-      <div class="col-sm-9 controls label-only"><%= job['report_type'] %></div>
+      <label class="col-sm-3 control-label"><%= I18n.t("report_job.report_type")  %></label>
+      <div class="col-sm-9 controls label-only"><%= I18n.t("reports.#{job['report_type']}.title", :default => job['report_type']) %></div>
+      <label class="col-sm-3 control-label"><%= I18n.t("report_job.format")  %></label>
+      <div class="col-sm-9 controls label-only"><%= I18n.t("reports.formats.#{job['format']}", :default => job['format']) %></div>
     </div>
 
 <% end %>
+
+
+<%# Now create a template for all job types not handled above - eg from plugins %>
+<% job_types.keys.each do |type| %>
+  <% next if ['container_labels_job', 'find_and_replace_job', 'print_to_pdf_job', 'import_job', 'report_job'].include?(type) %>
+  <% define_template(type, jsonmodel_definition(type.intern)) do |form, job| %>
+
+    <% begin %>
+      <%= render_aspace_partial :partial => "#{type}/show", :locals => {:job => job, :form => form} %>
+      <% rescue ActionView::MissingTemplate %>
+        <%# don't require plugins to provide a show %>
+    <% end %>
+
+  <% end %>
+<% end %>
+
 
 
 

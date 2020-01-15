@@ -51,6 +51,14 @@ body {
 }
 
 .badge {
-  background-color: #aaa;
+  background-color: #337ab7;
 }
 
+@media print {
+   a[href]:after {
+      display: none;
+   }
+   .pagination {
+     display: none;
+   }
+}

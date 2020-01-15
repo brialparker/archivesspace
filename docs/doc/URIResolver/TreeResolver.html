@@ -6,7 +6,7 @@
 <title>
   Class: URIResolver::TreeResolver
   
-    &mdash; Documentation by YARD 0.9.0
+    &mdash; Documentation by YARD 0.9.20
   
 </title>
 
@@ -28,7 +28,7 @@
   </head>
   <body>
     <div class="nav_wrap">
-      <iframe id="nav" src="../class_list.html"></iframe>
+      <iframe id="nav" src="../class_list.html?1"></iframe>
       <div id="resizer"></div>
     </div>
 
@@ -36,7 +36,7 @@
       <div id="header">
         <div id="menu">
   
-    <a href="../_index.html">Index (T)</a> &raquo;
+    <a href="../alpha_index.html">Index (T)</a> &raquo;
     <span class='title'><span class='object_link'><a href="../URIResolver.html" title="URIResolver (module)">URIResolver</a></span></span>
      &raquo; 
     <span class="title">TreeResolver</span>
@@ -58,8 +58,6 @@
 </div>
         <div class="clear"></div>
       </div>
-
-      <iframe id="search_frame" src="../class_list.html"></iframe>
 
       <div id="content"><h1>Class: URIResolver::TreeResolver
   
@@ -115,6 +113,8 @@ classification trees)</p>
   
 
 </div>
+
+
 
 
 
@@ -269,12 +269,12 @@ classification trees)</p>
       <pre class="lines">
 
 
-386
-387
-388</pre>
+390
+391
+392</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/lib/uri_resolver.rb', line 386</span>
+      <pre class="code"><span class="info file"># File 'backend/app/lib/uri_resolver.rb', line 390</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_initialize identifier id'>initialize</span><span class='lparen token'>(</span><span class='rubyid_model identifier id'>model</span><span class='rparen token'>)</span>
   <span class='rubyid_@model ivar id'>@model</span> <span class='assign token'>=</span> <span class='rubyid_model identifier id'>model</span>
@@ -307,13 +307,13 @@ classification trees)</p>
       <pre class="lines">
 
 
-381
-382
-383
-384</pre>
+385
+386
+387
+388</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/lib/uri_resolver.rb', line 381</span>
+      <pre class="code"><span class="info file"># File 'backend/app/lib/uri_resolver.rb', line 385</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_handler_for identifier id'>handler_for</span><span class='lparen token'>(</span><span class='rubyid_jsonmodel_type identifier id'>jsonmodel_type</span><span class='rparen token'>)</span>
   <span class='rubyid_model identifier id'>model</span> <span class='assign token'>=</span> <span class='rubyid_model_for_tree identifier id'>model_for_tree</span><span class='lparen token'>(</span><span class='rubyid_jsonmodel_type identifier id'>jsonmodel_type</span><span class='rparen token'>)</span>
@@ -369,20 +369,20 @@ classification trees)</p>
       <pre class="lines">
 
 
-399
-400
-401
-402
 403
 404
-405</pre>
+405
+406
+407
+408
+409</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/lib/uri_resolver.rb', line 399</span>
+      <pre class="code"><span class="info file"># File 'backend/app/lib/uri_resolver.rb', line 403</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_record_exists? fid id'>record_exists?</span><span class='lparen token'>(</span><span class='rubyid_uri identifier id'>uri</span><span class='rparen token'>)</span>
   <span class='comment val'># Trees have historically been given a free pass here, and it seems that</span>
-  <span class='comment val'># the current unit tests are relying on this.  I guess it's never caused a</span>
+  <span class='comment val'># the current unit tests are relying on this.  I guess it&#39;s never caused a</span>
   <span class='comment val'># problem, but this could conceivably do the same check as the regular</span>
   <span class='comment val'># ASModel resolver.</span>
   <span class='rubyid_true true kw'>true</span>
@@ -408,17 +408,17 @@ classification trees)</p>
       <pre class="lines">
 
 
-390
-391
-392
-393
 394
 395
 396
-397</pre>
+397
+398
+399
+400
+401</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/lib/uri_resolver.rb', line 390</span>
+      <pre class="code"><span class="info file"># File 'backend/app/lib/uri_resolver.rb', line 394</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_resolve identifier id'>resolve</span><span class='lparen token'>(</span><span class='rubyid_uris identifier id'>uris</span><span class='rparen token'>)</span>
   <span class='rubyid_Enumerator constant id'>Enumerator</span><span class='dot token'>.</span><span class='rubyid_new identifier id'>new</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_yielder identifier id'>yielder</span><span class='bitor op'>|</span>
@@ -439,10 +439,11 @@ classification trees)</p>
 </div>
 
       <div id="footer">
-  ArchivesSpace Version 20160724-1252 Documentation Generated on Thu Jul 28 18:04:55 2016 by
+  ArchivesSpace Version v2.7.0.a Documentation Generated on Tue Oct  8 14:03:51 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.0 (ruby-1.9.3).
+  0.9.20.
 </div>
+
     </div>
   </body>
 </html>

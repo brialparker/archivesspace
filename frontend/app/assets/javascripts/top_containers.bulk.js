@@ -1,3 +1,5 @@
+//= require tablesorter/jquery.tablesorter.min
+
 /***************************************************************************
  * BulkContainerSearch - provides all the behaviour to the ajax search
  * and selection of records.
@@ -29,15 +31,17 @@ BulkContainerSearch.prototype.perform_search = function(data) {
   self.$results_container.html(AS.renderTemplate("template_bulk_operation_loading"));
 
   $.ajax({
-    url:"/top_containers/bulk_operations/search",
+    url: AS.app_prefix("top_containers/bulk_operations/search"),
     data: data,
     type: "post",
     success: function(html) {
+      $.rails.enableFormElements(self.$search_form);
       self.$results_container.html(html);
       self.setup_table_sorter();
       self.update_button_state();
     },
     error: function(jqXHR, textStatus, errorThrown) {
+      $.rails.enableFormElements(self.$search_form);
       var html = AS.renderTemplate("template_bulk_operation_error_message", {message: jqXHR.responseText})
       self.$results_container.html(html);
       self.update_button_state();
@@ -186,12 +190,12 @@ BulkActionIlsHoldingUpdate.prototype.perform_update = function($form, $modal) {
   var self = this;
 
   $.ajax({
-    url:"/top_containers/bulk_operations/update",
+    url:AS.app_prefix("top_containers/bulk_operations/update"),
     data: $form.serializeArray(),
     type: "post",
     success: function(html) {
       $form.replaceWith(html);
-      $modal.trigger("resize");
+      $modal.trigger("resize.modal");
     },
     error: function(jqXHR, textStatus, errorThrown) {
       var error = AS.renderTemplate("template_bulk_operation_error_message", {message: jqXHR.responseText});
@@ -252,12 +256,12 @@ BulkActionContainerProfileUpdate.prototype.perform_update = function($form, $mod
   var self = this;
 
   $.ajax({
-    url:"/top_containers/bulk_operations/update",
+    url: AS.app_prefix("top_containers/bulk_operations/update"),
     data: $form.serializeArray(),
     type: "post",
     success: function(html) {
       $form.replaceWith(html);
-      $modal.trigger("resize");
+      $modal.trigger("resize.modal");
     },
     error: function(jqXHR, textStatus, errorThrown) {
       var error = AS.renderTemplate("template_bulk_operation_error_message", {message: jqXHR.responseText});
@@ -318,12 +322,12 @@ BulkActionLocationUpdate.prototype.perform_update = function($form, $modal) {
   var self = this;
 
   $.ajax({
-    url:"/top_containers/bulk_operations/update",
+    url: AS.app_prefix("top_containers/bulk_operations/update"),
     data: $form.serializeArray(),
     type: "post",
     success: function(html) {
       $form.replaceWith(html);
-      $modal.trigger("resize");
+      $modal.trigger("resize.modal");
     },
     error: function(jqXHR, textStatus, errorThrown) {
       var error = AS.renderTemplate("template_bulk_operation_error_message", {message: jqXHR.responseText});
@@ -382,7 +386,7 @@ BulkActionMultipleLocationUpdate.prototype.setup_update_form = function($modal) 
     },
     success: function(html) {
       $form.replaceWith(html);
-      $modal.trigger("resize");
+      $modal.trigger("resize.modal");
     },
     error: function(jqXHR, textStatus, errorThrown) {
       var error = $("<div>").attr("id", "alertBucket").html(jqXHR.responseText);
@@ -495,7 +499,7 @@ BulkActionBarcodeRapidEntry.prototype.setup_form_submission = function($modal) {
     },
     success: function(html) {
       $form.replaceWith(html);
-      $modal.trigger("resize");
+      $modal.trigger("resize.modal");
     },
     error: function(jqXHR, textStatus, errorThrown) {
       var error = $("<div>").attr("id", "alertBucket").html(jqXHR.responseText);

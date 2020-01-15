@@ -6,7 +6,7 @@
 <title>
   Module: Relationships::ClassMethods
   
-    &mdash; Documentation by YARD 0.9.0
+    &mdash; Documentation by YARD 0.9.20
   
 </title>
 
@@ -28,7 +28,7 @@
   </head>
   <body>
     <div class="nav_wrap">
-      <iframe id="nav" src="../class_list.html"></iframe>
+      <iframe id="nav" src="../class_list.html?1"></iframe>
       <div id="resizer"></div>
     </div>
 
@@ -36,7 +36,7 @@
       <div id="header">
         <div id="menu">
   
-    <a href="../_index.html">Index (C)</a> &raquo;
+    <a href="../alpha_index.html">Index (C)</a> &raquo;
     <span class='title'><span class='object_link'><a href="../Relationships.html" title="Relationships (module)">Relationships</a></span></span>
      &raquo; 
     <span class="title">ClassMethods</span>
@@ -58,8 +58,6 @@
 </div>
         <div class="clear"></div>
       </div>
-
-      <iframe id="search_frame" src="../class_list.html"></iframe>
 
       <div id="content"><h1>Module: Relationships::ClassMethods
   
@@ -255,7 +253,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Delete all existing relationships for &#8216;obj&#8217;.</p>
+    <span class="summary_desc"><div class='inline'><p>Delete all existing relationships for ‘obj’.</p>
 </div></span>
   
 </li>
@@ -287,7 +285,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#eager_load_relationships-instance_method" title="#eager_load_relationships (instance method)">#<strong>eager_load_relationships</strong>(objects)  &#x21d2; Object </a>
+      <a href="#eager_load_relationships-instance_method" title="#eager_load_relationships (instance method)">#<strong>eager_load_relationships</strong>(objects, relationships_to_load = nil)  &#x21d2; Object </a>
     
 
     
@@ -301,7 +299,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Find all of the relationships involving &#8216;objects&#8217; and tell each object to cache its relationships.</p>
+    <span class="summary_desc"><div class='inline'><p>Find all of the relationships involving ‘objects’ and tell each object to cache its relationships.</p>
 </div></span>
   
 </li>
@@ -347,7 +345,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Find all instances of the referring class that have a relationship with &#8216;obj&#8217; Spans all defined relationships.</p>
+    <span class="summary_desc"><div class='inline'><p>Find all instances of the referring class that have a relationship with ‘obj’ Spans all defined relationships.</p>
 </div></span>
   
 </li>
@@ -468,6 +466,29 @@
 </li>
 
       
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#update_toplevel_mtimes-instance_method" title="#update_toplevel_mtimes (instance method)">#<strong>update_toplevel_mtimes</strong>(dataset, new_mtime)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Given a <code>dataset</code> that links the current record type to some relationship type, set the modification time of the nearest top-level record to <code>new_mtime</code>.</p>
+</div></span>
+  
+</li>
+
+      
     </ul>
   
 
@@ -492,13 +513,13 @@
       <pre class="lines">
 
 
-693
-694
-695
-696</pre>
+709
+710
+711
+712</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 693</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 709</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_add_relationship_dependency identifier id'>add_relationship_dependency</span><span class='lparen token'>(</span><span class='rubyid_relationship_name identifier id'>relationship_name</span><span class='comma token'>,</span> <span class='rubyid_clz identifier id'>clz</span><span class='rparen token'>)</span>
   <span class='rubyid_@relationship_dependencies ivar id'>@relationship_dependencies</span><span class='lbrack token'>[</span><span class='rubyid_relationship_name identifier id'>relationship_name</span><span class='rbrack token'>]</span> <span class='opasgn op'>||=</span> <span class='lbrack token'>[</span><span class='rbrack token'>]</span>
@@ -535,20 +556,6 @@
       <pre class="lines">
 
 
-571
-572
-573
-574
-575
-576
-577
-578
-579
-580
-581
-582
-583
-584
 585
 586
 587
@@ -579,10 +586,24 @@
 612
 613
 614
-615</pre>
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628
+629</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 571</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 585</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_apply_relationships identifier id'>apply_relationships</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='comma token'>,</span> <span class='rubyid_json identifier id'>json</span><span class='comma token'>,</span> <span class='rubyid_opts identifier id'>opts</span><span class='comma token'>,</span> <span class='rubyid_new_record identifier id'>new_record</span> <span class='assign token'>=</span> <span class='rubyid_false false kw'>false</span><span class='rparen token'>)</span>
   <span class='rubyid_delete_existing_relationships identifier id'>delete_existing_relationships</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='rparen token'>)</span> <span class='rubyid_if if_mod kw'>if</span> <span class='notop op'>!</span><span class='rubyid_new_record identifier id'>new_record</span>
@@ -590,27 +611,27 @@
   <span class='rubyid_@relationships ivar id'>@relationships</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_relationship_name identifier id'>relationship_name</span><span class='comma token'>,</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='bitor op'>|</span>
     <span class='rubyid_property_name identifier id'>property_name</span> <span class='assign token'>=</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_json_property identifier id'>json_property</span>
 
-    <span class='comment val'># If there's no property name, the relationship is just read-only</span>
+    <span class='comment val'># If there&#39;s no property name, the relationship is just read-only</span>
     <span class='rubyid_next next kw'>next</span> <span class='rubyid_if if_mod kw'>if</span> <span class='notop op'>!</span><span class='rubyid_property_name identifier id'>property_name</span>
 
     <span class='comment val'># For each record reference in our JSON data</span>
     <span class='rubyid_ASUtils constant id'>ASUtils</span><span class='dot token'>.</span><span class='rubyid_as_array identifier id'>as_array</span><span class='lparen token'>(</span><span class='rubyid_json identifier id'>json</span><span class='lbrack token'>[</span><span class='rubyid_property_name identifier id'>property_name</span><span class='rbrack token'>]</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='rubyid_each_with_index identifier id'>each_with_index</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_reference identifier id'>reference</span><span class='comma token'>,</span> <span class='rubyid_idx identifier id'>idx</span><span class='bitor op'>|</span>
-      <span class='rubyid_record_type identifier id'>record_type</span> <span class='assign token'>=</span> <span class='rubyid_parse_reference identifier id'>parse_reference</span><span class='lparen token'>(</span><span class='rubyid_reference identifier id'>reference</span><span class='lbrack token'>[</span><span class='string val'>'ref'</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='rubyid_opts identifier id'>opts</span><span class='rparen token'>)</span>
+      <span class='rubyid_record_type identifier id'>record_type</span> <span class='assign token'>=</span> <span class='rubyid_parse_reference identifier id'>parse_reference</span><span class='lparen token'>(</span><span class='rubyid_reference identifier id'>reference</span><span class='lbrack token'>[</span><span class='string val'>&#39;ref&#39;</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='rubyid_opts identifier id'>opts</span><span class='rparen token'>)</span>
 
       <span class='rubyid_referent_model identifier id'>referent_model</span> <span class='assign token'>=</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_participating_models identifier id'>participating_models</span><span class='dot token'>.</span><span class='rubyid_find identifier id'>find</span> <span class='lbrace token'>{</span><span class='bitor op'>|</span><span class='rubyid_model identifier id'>model</span><span class='bitor op'>|</span>
         <span class='rubyid_model identifier id'>model</span><span class='dot token'>.</span><span class='rubyid_my_jsonmodel identifier id'>my_jsonmodel</span><span class='dot token'>.</span><span class='rubyid_record_type identifier id'>record_type</span> <span class='eq op'>==</span> <span class='rubyid_record_type identifier id'>record_type</span><span class='lbrack token'>[</span><span class='symbol val'>:type</span><span class='rbrack token'>]</span>
-      <span class='rbrace token'>}</span> <span class='rubyid_or or kw'>or</span> <span class='rubyid_raise identifier id'>raise</span> <span class='dstring node'>&quot;Couldn't find model for #{record_type[:type]}&quot;</span>
+      <span class='rbrace token'>}</span> <span class='rubyid_or or kw'>or</span> <span class='rubyid_raise identifier id'>raise</span> <span class='dstring node'>&quot;Couldn&#39;t find model for #{record_type[:type]}&quot;</span>
 
       <span class='rubyid_referent identifier id'>referent</span> <span class='assign token'>=</span> <span class='rubyid_referent_model identifier id'>referent_model</span><span class='lbrack token'>[</span><span class='rubyid_record_type identifier id'>record_type</span><span class='lbrack token'>[</span><span class='symbol val'>:id</span><span class='rbrack token'>]</span><span class='rbrack token'>]</span>
 
       <span class='rubyid_if if kw'>if</span> <span class='notop op'>!</span><span class='rubyid_referent identifier id'>referent</span>
-        <span class='rubyid_raise identifier id'>raise</span> <span class='rubyid_ReferenceError constant id'>ReferenceError</span><span class='dot token'>.</span><span class='rubyid_new identifier id'>new</span><span class='lparen token'>(</span><span class='dstring node'>&quot;Can't relate to non-existent record: #{reference['ref']}&quot;</span><span class='rparen token'>)</span>
+        <span class='rubyid_raise identifier id'>raise</span> <span class='rubyid_ReferenceError constant id'>ReferenceError</span><span class='dot token'>.</span><span class='rubyid_new identifier id'>new</span><span class='lparen token'>(</span><span class='dstring node'>&quot;Can&#39;t relate to non-existent record: #{reference[&#39;ref&#39;]}&quot;</span><span class='rparen token'>)</span>
       <span class='rubyid_end end kw'>end</span>
 
       <span class='comment val'># Create a new relationship instance linking us and them together, and</span>
       <span class='comment val'># add the properties from the JSON request to the relationship</span>
       <span class='rubyid_properties identifier id'>properties</span> <span class='assign token'>=</span> <span class='rubyid_reference identifier id'>reference</span><span class='dot token'>.</span><span class='rubyid_clone identifier id'>clone</span><span class='dot token'>.</span><span class='rubyid_tap identifier id'>tap</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_properties identifier id'>properties</span><span class='bitor op'>|</span>
-        <span class='rubyid_properties identifier id'>properties</span><span class='dot token'>.</span><span class='rubyid_delete identifier id'>delete</span><span class='lparen token'>(</span><span class='string val'>'ref'</span><span class='rparen token'>)</span>
+        <span class='rubyid_properties identifier id'>properties</span><span class='dot token'>.</span><span class='rubyid_delete identifier id'>delete</span><span class='lparen token'>(</span><span class='string val'>&#39;ref&#39;</span><span class='rparen token'>)</span>
       <span class='rubyid_end end kw'>end</span>
 
       <span class='rubyid_properties identifier id'>properties</span><span class='lbrack token'>[</span><span class='symbol val'>:aspace_relationship_position</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='rubyid_idx identifier id'>idx</span>
@@ -620,8 +641,8 @@
       <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_relate identifier id'>relate</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='comma token'>,</span> <span class='rubyid_referent identifier id'>referent</span><span class='comma token'>,</span> <span class='rubyid_properties identifier id'>properties</span><span class='rparen token'>)</span>
 
       <span class='comment val'># If this is a reciprocal relationship (defined on both participating</span>
-      <span class='comment val'># models), update the referent's lock version to ensure that a</span>
-      <span class='comment val'># concurrent update to that object won't clobber our changes.</span>
+      <span class='comment val'># models), update the referent&#39;s lock version to ensure that a</span>
+      <span class='comment val'># concurrent update to that object won&#39;t clobber our changes.</span>
 
       <span class='rubyid_if if kw'>if</span> <span class='rubyid_referent_model identifier id'>referent_model</span><span class='dot token'>.</span><span class='rubyid_find_relationship identifier id'>find_relationship</span><span class='lparen token'>(</span><span class='rubyid_relationship_name identifier id'>relationship_name</span><span class='comma token'>,</span> <span class='rubyid_true true kw'>true</span><span class='rparen token'>)</span> <span class='andop op'>&amp;&amp;</span> <span class='notop op'>!</span><span class='rubyid_opts identifier id'>opts</span><span class='lbrack token'>[</span><span class='symbol val'>:system_generated</span><span class='rbrack token'>]</span>
         <span class='rubyid_DB constant id'>DB</span><span class='dot token'>.</span><span class='rubyid_increase_lock_version_or_fail identifier id'>increase_lock_version_or_fail</span><span class='lparen token'>(</span><span class='rubyid_referent identifier id'>referent</span><span class='rparen token'>)</span>
@@ -650,15 +671,6 @@
       <pre class="lines">
 
 
-441
-442
-443
-444
-445
-446
-447
-448
-449
 450
 451
 452
@@ -668,10 +680,19 @@
 456
 457
 458
-459</pre>
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 441</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 450</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_calculate_object_graph identifier id'>calculate_object_graph</span><span class='lparen token'>(</span><span class='rubyid_object_graph identifier id'>object_graph</span><span class='comma token'>,</span> <span class='rubyid_opts identifier id'>opts</span> <span class='assign token'>=</span> <span class='lbrace token'>{</span><span class='rbrace token'>}</span><span class='rparen token'>)</span>
   <span class='comment val'># For each relationship involving a resource</span>
@@ -723,12 +744,12 @@
       <pre class="lines">
 
 
-463
-464
-465</pre>
+472
+473
+474</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 463</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 472</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_clear_relationships identifier id'>clear_relationships</span>
   <span class='rubyid_@relationships ivar id'>@relationships</span> <span class='assign token'>=</span> <span class='lbrace token'>{</span><span class='rbrace token'>}</span>
@@ -754,14 +775,14 @@
       <pre class="lines">
 
 
-634
-635
-636
-637
-638</pre>
+650
+651
+652
+653
+654</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 634</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 650</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_create_from_json identifier id'>create_from_json</span><span class='lparen token'>(</span><span class='rubyid_json identifier id'>json</span><span class='comma token'>,</span> <span class='rubyid_opts identifier id'>opts</span> <span class='assign token'>=</span> <span class='lbrace token'>{</span><span class='rbrace token'>}</span><span class='rparen token'>)</span>
   <span class='rubyid_obj identifier id'>obj</span> <span class='assign token'>=</span> <span class='rubyid_super super kw'>super</span>
@@ -799,15 +820,6 @@
       <pre class="lines">
 
 
-488
-489
-490
-491
-492
-493
-494
-495
-496
 497
 498
 499
@@ -841,10 +853,24 @@
 527
 528
 529
-530</pre>
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 488</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 497</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_define_relationship identifier id'>define_relationship</span><span class='lparen token'>(</span><span class='rubyid_opts identifier id'>opts</span><span class='rparen token'>)</span>
   <span class='lbrack token'>[</span><span class='symbol val'>:name</span><span class='comma token'>,</span> <span class='symbol val'>:contains_references_to_types</span><span class='rbrack token'>]</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_p identifier id'>p</span><span class='bitor op'>|</span>
@@ -856,11 +882,11 @@
   <span class='rubyid_ArchivesSpaceService constant id'>ArchivesSpaceService</span><span class='dot token'>.</span><span class='rubyid_loaded_hook identifier id'>loaded_hook</span> <span class='rubyid_do do kw'>do</span>
     <span class='comment val'># We hold off actually setting anything up until all models have been</span>
     <span class='comment val'># loaded, since our relationships may need to reference a model that</span>
-    <span class='comment val'># hasn't been loaded yet.</span>
+    <span class='comment val'># hasn&#39;t been loaded yet.</span>
     <span class='comment val'>#</span>
     <span class='comment val'># This is also why the :contains_references_to_types property is a proc</span>
-    <span class='comment val'># instead of a regular array--we don't want to blow up with a NameError</span>
-    <span class='comment val'># if the model hasn't been loaded yet.</span>
+    <span class='comment val'># instead of a regular array--we don&#39;t want to blow up with a NameError</span>
+    <span class='comment val'># if the model hasn&#39;t been loaded yet.</span>
 
 
     <span class='rubyid_related_models identifier id'>related_models</span> <span class='assign token'>=</span> <span class='rubyid_opts identifier id'>opts</span><span class='lbrack token'>[</span><span class='symbol val'>:contains_references_to_types</span><span class='rbrack token'>]</span><span class='dot token'>.</span><span class='rubyid_call identifier id'>call</span>
@@ -871,7 +897,7 @@
       <span class='rubyid_set_primary_key identifier id'>set_primary_key</span><span class='lparen token'>(</span><span class='symbol val'>:id</span><span class='rparen token'>)</span>
 
       <span class='rubyid_if if kw'>if</span> <span class='notop op'>!</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_db identifier id'>db</span><span class='dot token'>.</span><span class='rubyid_table_exists? fid id'>table_exists?</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='rparen token'>)</span>
-        <span class='rubyid_Log constant id'>Log</span><span class='dot token'>.</span><span class='rubyid_warn identifier id'>warn</span><span class='lparen token'>(</span><span class='dstring node'>&quot;Table doesn't exist: #{self.table_name}&quot;</span><span class='rparen token'>)</span>
+        <span class='rubyid_Log constant id'>Log</span><span class='dot token'>.</span><span class='rubyid_warn identifier id'>warn</span><span class='lparen token'>(</span><span class='dstring node'>&quot;Table doesn&#39;t exist: #{self.table_name}&quot;</span><span class='rparen token'>)</span>
       <span class='rubyid_end end kw'>end</span>
 
       <span class='rubyid_set_participating_models identifier id'>set_participating_models</span><span class='lparen token'>(</span><span class='lbrack token'>[</span><span class='rubyid_base identifier id'>base</span><span class='comma token'>,</span> <span class='mult op'>*</span><span class='rubyid_related_models identifier id'>related_models</span><span class='rbrack token'>]</span><span class='dot token'>.</span><span class='rubyid_uniq identifier id'>uniq</span><span class='rparen token'>)</span>
@@ -887,6 +913,11 @@
       <span class='rubyid_model identifier id'>model</span><span class='dot token'>.</span><span class='rubyid_include identifier id'>include</span><span class='lparen token'>(</span><span class='rubyid_Relationships constant id'>Relationships</span><span class='rparen token'>)</span>
       <span class='rubyid_model identifier id'>model</span><span class='dot token'>.</span><span class='rubyid_add_relationship_dependency identifier id'>add_relationship_dependency</span><span class='lparen token'>(</span><span class='rubyid_opts identifier id'>opts</span><span class='lbrack token'>[</span><span class='symbol val'>:name</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='rubyid_base identifier id'>base</span><span class='rparen token'>)</span>
     <span class='rubyid_end end kw'>end</span>
+
+    <span class='comment val'># Give the new relationship class a name to help with debugging</span>
+    <span class='comment val'># Example: Relationships::ResourceSubject</span>
+    <span class='rubyid_Relationships constant id'>Relationships</span><span class='dot token'>.</span><span class='rubyid_const_set identifier id'>const_set</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_name identifier id'>name</span> <span class='plus op'>+</span> <span class='rubyid_opts identifier id'>opts</span><span class='lbrack token'>[</span><span class='symbol val'>:name</span><span class='rbrack token'>]</span><span class='dot token'>.</span><span class='rubyid_to_s identifier id'>to_s</span><span class='dot token'>.</span><span class='rubyid_camelize identifier id'>camelize</span><span class='comma token'>,</span> <span class='rubyid_clz identifier id'>clz</span><span class='rparen token'>)</span>
+
   <span class='rubyid_end end kw'>end</span>
 <span class='rubyid_end end kw'>end</span>
 </pre>
@@ -906,7 +937,7 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Delete all existing relationships for &#8216;obj&#8217;.</p>
+    <p>Delete all existing relationships for ‘obj’.</p>
 
 
   </div>
@@ -920,20 +951,6 @@
       <pre class="lines">
 
 
-534
-535
-536
-537
-538
-539
-540
-541
-542
-543
-544
-545
-546
-547
 548
 549
 550
@@ -953,10 +970,24 @@
 564
 565
 566
-567</pre>
+567
+568
+569
+570
+571
+572
+573
+574
+575
+576
+577
+578
+579
+580
+581</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 534</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 548</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_delete_existing_relationships identifier id'>delete_existing_relationships</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='comma token'>,</span> <span class='rubyid_bump_lock_version_on_referent identifier id'>bump_lock_version_on_referent</span> <span class='assign token'>=</span> <span class='rubyid_false false kw'>false</span><span class='comma token'>,</span> <span class='rubyid_force identifier id'>force</span> <span class='assign token'>=</span> <span class='rubyid_false false kw'>false</span><span class='comma token'>,</span> <span class='rubyid_predicate identifier id'>predicate</span> <span class='assign token'>=</span> <span class='rubyid_nil nil kw'>nil</span><span class='rparen token'>)</span>
   <span class='rubyid_relationships identifier id'>relationships</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='bitor op'>|</span>
@@ -964,9 +995,9 @@
     <span class='rubyid_next next kw'>next</span> <span class='rubyid_if if_mod kw'>if</span> <span class='lparen token'>(</span><span class='notop op'>!</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_json_property identifier id'>json_property</span> <span class='andop op'>&amp;&amp;</span> <span class='notop op'>!</span><span class='rubyid_force identifier id'>force</span><span class='rparen token'>)</span>
 
     <span class='rubyid_if if kw'>if</span> <span class='lparen token'>(</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_json_property identifier id'>json_property</span> <span class='andop op'>&amp;&amp;</span>
-        <span class='lparen token'>(</span><span class='notop op'>!</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_my_jsonmodel identifier id'>my_jsonmodel</span><span class='dot token'>.</span><span class='rubyid_schema identifier id'>schema</span><span class='lbrack token'>[</span><span class='string val'>'properties'</span><span class='rbrack token'>]</span><span class='lbrack token'>[</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_json_property identifier id'>json_property</span><span class='rbrack token'>]</span> <span class='orop op'>||</span>
-         <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_my_jsonmodel identifier id'>my_jsonmodel</span><span class='dot token'>.</span><span class='rubyid_schema identifier id'>schema</span><span class='lbrack token'>[</span><span class='string val'>'properties'</span><span class='rbrack token'>]</span><span class='lbrack token'>[</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_json_property identifier id'>json_property</span><span class='rbrack token'>]</span><span class='lbrack token'>[</span><span class='string val'>'readonly'</span><span class='rbrack token'>]</span> <span class='eqq op'>===</span> <span class='string val'>'true'</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
-      <span class='comment val'># Don't delete instances of relationships that are read-only in this direction.</span>
+        <span class='lparen token'>(</span><span class='notop op'>!</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_my_jsonmodel identifier id'>my_jsonmodel</span><span class='dot token'>.</span><span class='rubyid_schema identifier id'>schema</span><span class='lbrack token'>[</span><span class='string val'>&#39;properties&#39;</span><span class='rbrack token'>]</span><span class='lbrack token'>[</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_json_property identifier id'>json_property</span><span class='rbrack token'>]</span> <span class='orop op'>||</span>
+         <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_my_jsonmodel identifier id'>my_jsonmodel</span><span class='dot token'>.</span><span class='rubyid_schema identifier id'>schema</span><span class='lbrack token'>[</span><span class='string val'>&#39;properties&#39;</span><span class='rbrack token'>]</span><span class='lbrack token'>[</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_json_property identifier id'>json_property</span><span class='rbrack token'>]</span><span class='lbrack token'>[</span><span class='string val'>&#39;readonly&#39;</span><span class='rbrack token'>]</span> <span class='eqq op'>===</span> <span class='string val'>&#39;true&#39;</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+      <span class='comment val'># Don&#39;t delete instances of relationships that are read-only in this direction.</span>
       <span class='rubyid_next next kw'>next</span>
     <span class='rubyid_end end kw'>end</span>
 
@@ -976,8 +1007,8 @@
       <span class='comment val'># If our predicate says to spare this relationship, leave it alone</span>
       <span class='rubyid_next next kw'>next</span> <span class='rubyid_if if_mod kw'>if</span> <span class='rubyid_predicate identifier id'>predicate</span> <span class='andop op'>&amp;&amp;</span> <span class='notop op'>!</span><span class='rubyid_predicate identifier id'>predicate</span><span class='dot token'>.</span><span class='rubyid_call identifier id'>call</span><span class='lparen token'>(</span><span class='rubyid_relationship identifier id'>relationship</span><span class='rparen token'>)</span>
 
-      <span class='comment val'># If we're deleting a relationship without replacing it, bump the lock</span>
-      <span class='comment val'># version on the referent object so it doesn't accidentally get</span>
+      <span class='comment val'># If we&#39;re deleting a relationship without replacing it, bump the lock</span>
+      <span class='comment val'># version on the referent object so it doesn&#39;t accidentally get</span>
       <span class='comment val'># re-added.</span>
       <span class='comment val'>#</span>
       <span class='comment val'># This will also encourage the indexer to pick up changes on deletion</span>
@@ -1013,12 +1044,12 @@
       <pre class="lines">
 
 
-478
-479
-480</pre>
+487
+488
+489</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 478</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 487</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_dependent_models identifier id'>dependent_models</span>
   <span class='rubyid_@relationship_dependencies ivar id'>@relationship_dependencies</span><span class='dot token'>.</span><span class='rubyid_values identifier id'>values</span><span class='dot token'>.</span><span class='rubyid_flatten identifier id'>flatten</span><span class='dot token'>.</span><span class='rubyid_uniq identifier id'>uniq</span>
@@ -1032,7 +1063,7 @@
       <div class="method_details ">
   <h3 class="signature " id="eager_load_relationships-instance_method">
   
-    #<strong>eager_load_relationships</strong>(objects)  &#x21d2; <tt>Object</tt> 
+    #<strong>eager_load_relationships</strong>(objects, relationships_to_load = nil)  &#x21d2; <tt>Object</tt> 
   
 
   
@@ -1040,7 +1071,7 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Find all of the relationships involving &#8216;objects&#8217; and tell each object to
+    <p>Find all of the relationships involving ‘objects’ and tell each object to
 cache its relationships.  This is an optimisation: avoids the need for one
 SELECT for every relationship lookup by pulling back all relationships at
 once.</p>
@@ -1057,22 +1088,26 @@ once.</p>
       <pre class="lines">
 
 
-622
-623
-624
-625
-626
-627
-628
-629
-630
-631</pre>
+636
+637
+638
+639
+640
+641
+642
+643
+644
+645
+646
+647</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 622</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 636</span>
 
-<span class='rubyid_def def kw'>def</span> <span class='rubyid_eager_load_relationships identifier id'>eager_load_relationships</span><span class='lparen token'>(</span><span class='rubyid_objects identifier id'>objects</span><span class='rparen token'>)</span>
-  <span class='rubyid_relationships identifier id'>relationships</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='bitor op'>|</span>
+<span class='rubyid_def def kw'>def</span> <span class='rubyid_eager_load_relationships identifier id'>eager_load_relationships</span><span class='lparen token'>(</span><span class='rubyid_objects identifier id'>objects</span><span class='comma token'>,</span> <span class='rubyid_relationships_to_load identifier id'>relationships_to_load</span> <span class='assign token'>=</span> <span class='rubyid_nil nil kw'>nil</span><span class='rparen token'>)</span>
+  <span class='rubyid_relationships_to_load identifier id'>relationships_to_load</span> <span class='assign token'>=</span> <span class='rubyid_relationships identifier id'>relationships</span> <span class='rubyid_unless unless_mod kw'>unless</span> <span class='rubyid_relationships_to_load identifier id'>relationships_to_load</span>
+
+  <span class='rubyid_relationships_to_load identifier id'>relationships_to_load</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='bitor op'>|</span>
     <span class='comment val'># For each defined relationship</span>
     <span class='rubyid_relationships_map identifier id'>relationships_map</span> <span class='assign token'>=</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_find_by_participants identifier id'>find_by_participants</span><span class='lparen token'>(</span><span class='rubyid_objects identifier id'>objects</span><span class='rparen token'>)</span>
 
@@ -1102,15 +1137,15 @@ once.</p>
       <pre class="lines">
 
 
-483
-484
-485</pre>
+492
+493
+494</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 483</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 492</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_find_relationship identifier id'>find_relationship</span><span class='lparen token'>(</span><span class='rubyid_name identifier id'>name</span><span class='comma token'>,</span> <span class='rubyid_noerror identifier id'>noerror</span> <span class='assign token'>=</span> <span class='rubyid_false false kw'>false</span><span class='rparen token'>)</span>
-  <span class='rubyid_@relationships ivar id'>@relationships</span><span class='lbrack token'>[</span><span class='rubyid_name identifier id'>name</span><span class='rbrack token'>]</span> <span class='rubyid_or or kw'>or</span> <span class='lparen token'>(</span><span class='rubyid_noerror identifier id'>noerror</span> <span class='integer val'>? </span><span class='rubyid_nil nil kw'>nil</span> <span class='colon op'>:</span> <span class='rubyid_raise identifier id'>raise</span><span class='lparen token'>(</span><span class='dstring node'>&quot;Couldn't find #{name} in #{@relationships.inspect}&quot;</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+  <span class='rubyid_@relationships ivar id'>@relationships</span><span class='lbrack token'>[</span><span class='rubyid_name identifier id'>name</span><span class='rbrack token'>]</span> <span class='rubyid_or or kw'>or</span> <span class='lparen token'>(</span><span class='rubyid_noerror identifier id'>noerror</span> <span class='integer val'>? </span><span class='rubyid_nil nil kw'>nil</span> <span class='colon op'>:</span> <span class='rubyid_raise identifier id'>raise</span><span class='lparen token'>(</span><span class='dstring node'>&quot;Couldn&#39;t find #{name} in #{@relationships.inspect}&quot;</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
 <span class='rubyid_end end kw'>end</span>
 </pre>
     </td>
@@ -1129,7 +1164,7 @@ once.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Find all instances of the referring class that have a relationship with &#8216;obj&#8217;
+    <p>Find all instances of the referring class that have a relationship with ‘obj’
 Spans all defined relationships.</p>
 
 
@@ -1144,14 +1179,14 @@ Spans all defined relationships.</p>
       <pre class="lines">
 
 
-686
-687
-688
-689
-690</pre>
+702
+703
+704
+705
+706</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 686</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 702</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_instances_relating_to identifier id'>instances_relating_to</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='rparen token'>)</span>
   <span class='rubyid_relationships identifier id'>relationships</span><span class='dot token'>.</span><span class='rubyid_map identifier id'>map</span> <span class='lbrace token'>{</span><span class='bitor op'>|</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='bitor op'>|</span>
@@ -1179,12 +1214,12 @@ Spans all defined relationships.</p>
       <pre class="lines">
 
 
-473
-474
-475</pre>
+482
+483
+484</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 473</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 482</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_relationship_dependencies identifier id'>relationship_dependencies</span>
   <span class='rubyid_@relationship_dependencies ivar id'>@relationship_dependencies</span>
@@ -1210,12 +1245,12 @@ Spans all defined relationships.</p>
       <pre class="lines">
 
 
-468
-469
-470</pre>
+477
+478
+479</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 468</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 477</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_relationships identifier id'>relationships</span>
   <span class='rubyid_@relationships ivar id'>@relationships</span><span class='dot token'>.</span><span class='rubyid_values identifier id'>values</span>
@@ -1241,22 +1276,6 @@ Spans all defined relationships.</p>
       <pre class="lines">
 
 
-641
-642
-643
-644
-645
-646
-647
-648
-649
-650
-651
-652
-653
-654
-655
-656
 657
 658
 659
@@ -1281,23 +1300,39 @@ Spans all defined relationships.</p>
 678
 679
 680
-681</pre>
+681
+682
+683
+684
+685
+686
+687
+688
+689
+690
+691
+692
+693
+694
+695
+696
+697</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 641</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 657</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_sequel_to_jsonmodel identifier id'>sequel_to_jsonmodel</span><span class='lparen token'>(</span><span class='rubyid_objs identifier id'>objs</span><span class='comma token'>,</span> <span class='rubyid_opts identifier id'>opts</span> <span class='assign token'>=</span> <span class='lbrace token'>{</span><span class='rbrace token'>}</span><span class='rparen token'>)</span>
   <span class='rubyid_jsons identifier id'>jsons</span> <span class='assign token'>=</span> <span class='rubyid_super super kw'>super</span>
 
   <span class='rubyid_return return kw'>return</span> <span class='rubyid_jsons identifier id'>jsons</span> <span class='rubyid_if if_mod kw'>if</span> <span class='rubyid_opts identifier id'>opts</span><span class='lbrack token'>[</span><span class='symbol val'>:skip_relationships</span><span class='rbrack token'>]</span>
 
-  <span class='rubyid_eager_load_relationships identifier id'>eager_load_relationships</span><span class='lparen token'>(</span><span class='rubyid_objs identifier id'>objs</span><span class='rparen token'>)</span>
+  <span class='rubyid_eager_load_relationships identifier id'>eager_load_relationships</span><span class='lparen token'>(</span><span class='rubyid_objs identifier id'>objs</span><span class='comma token'>,</span> <span class='rubyid_relationships identifier id'>relationships</span><span class='dot token'>.</span><span class='rubyid_select identifier id'>select</span> <span class='lbrace token'>{</span><span class='bitor op'>|</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='bitor op'>|</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_json_property identifier id'>json_property</span><span class='rbrace token'>}</span><span class='rparen token'>)</span>
 
   <span class='rubyid_jsons identifier id'>jsons</span><span class='dot token'>.</span><span class='rubyid_zip identifier id'>zip</span><span class='lparen token'>(</span><span class='rubyid_objs identifier id'>objs</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_json identifier id'>json</span><span class='comma token'>,</span> <span class='rubyid_obj identifier id'>obj</span><span class='bitor op'>|</span>
     <span class='rubyid_relationships identifier id'>relationships</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='bitor op'>|</span>
       <span class='rubyid_property_name identifier id'>property_name</span> <span class='assign token'>=</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_json_property identifier id'>json_property</span>
 
-      <span class='comment val'># If we don't need this property in our return JSON, skip it.</span>
+      <span class='comment val'># If we don&#39;t need this property in our return JSON, skip it.</span>
       <span class='rubyid_next next kw'>next</span> <span class='rubyid_unless unless_mod kw'>unless</span> <span class='rubyid_property_name identifier id'>property_name</span>
 
       <span class='comment val'># For each defined relationship</span>
@@ -1314,7 +1349,7 @@ Spans all defined relationships.</p>
         <span class='comment val'># Return the relationship properties, plus the URI reference of the</span>
         <span class='comment val'># related object</span>
         <span class='rubyid_values identifier id'>values</span> <span class='assign token'>=</span> <span class='rubyid_ASUtils constant id'>ASUtils</span><span class='dot token'>.</span><span class='rubyid_keys_as_strings identifier id'>keys_as_strings</span><span class='lparen token'>(</span><span class='rubyid_relationship identifier id'>relationship</span><span class='dot token'>.</span><span class='rubyid_properties identifier id'>properties</span><span class='rparen token'>)</span>
-        <span class='rubyid_values identifier id'>values</span><span class='lbrack token'>[</span><span class='string val'>'ref'</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='rubyid_relationship identifier id'>relationship</span><span class='dot token'>.</span><span class='rubyid_uri_for_other_referent_than identifier id'>uri_for_other_referent_than</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='rparen token'>)</span>
+        <span class='rubyid_values identifier id'>values</span><span class='lbrack token'>[</span><span class='string val'>&#39;ref&#39;</span><span class='rbrack token'>]</span> <span class='assign token'>=</span> <span class='rubyid_relationship identifier id'>relationship</span><span class='dot token'>.</span><span class='rubyid_uri_for_other_referent_than identifier id'>uri_for_other_referent_than</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='rparen token'>)</span>
 
         <span class='rubyid_values identifier id'>values</span>
       <span class='rbrace token'>}</span>
@@ -1360,22 +1395,6 @@ to the updated instance and update their mtime.</p>
       <pre class="lines">
 
 
-707
-708
-709
-710
-711
-712
-713
-714
-715
-716
-717
-718
-719
-720
-721
-722
 723
 724
 725
@@ -1413,10 +1432,40 @@ to the updated instance and update their mtime.</p>
 757
 758
 759
-760</pre>
+760
+761
+762
+763
+764
+765
+766
+767
+768
+769
+770
+771
+772
+773
+774
+775
+776
+777
+778
+779
+780
+781
+782
+783
+784
+785
+786
+787
+788
+789
+790</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 707</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 723</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_touch_mtime_of_anyone_related_to identifier id'>touch_mtime_of_anyone_related_to</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='rparen token'>)</span>
   <span class='rubyid_now identifier id'>now</span> <span class='assign token'>=</span> <span class='rubyid_Time constant id'>Time</span><span class='dot token'>.</span><span class='rubyid_now identifier id'>now</span>
@@ -1424,50 +1473,64 @@ to the updated instance and update their mtime.</p>
   <span class='rubyid_relationships identifier id'>relationships</span><span class='dot token'>.</span><span class='rubyid_map identifier id'>map</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='bitor op'>|</span>
     <span class='rubyid_models identifier id'>models</span> <span class='assign token'>=</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_participating_models identifier id'>participating_models</span>
 
-    <span class='rubyid_if if kw'>if</span> <span class='rubyid_models identifier id'>models</span><span class='dot token'>.</span><span class='rubyid_include? fid id'>include?</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='dot token'>.</span><span class='rubyid_class identifier id'>class</span><span class='rparen token'>)</span>
-      <span class='rubyid_their_ref_columns identifier id'>their_ref_columns</span> <span class='assign token'>=</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_reference_columns_for identifier id'>reference_columns_for</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='dot token'>.</span><span class='rubyid_class identifier id'>class</span><span class='rparen token'>)</span>
-      <span class='rubyid_my_ref_columns identifier id'>my_ref_columns</span> <span class='assign token'>=</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_reference_columns_for identifier id'>reference_columns_for</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='rparen token'>)</span>
-      <span class='rubyid_their_ref_columns identifier id'>their_ref_columns</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_their_col identifier id'>their_col</span><span class='bitor op'>|</span>
-        <span class='rubyid_my_ref_columns identifier id'>my_ref_columns</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_my_col identifier id'>my_col</span><span class='bitor op'>|</span>
+    <span class='comment val'># If this relationship doesn&#39;t link to records of type `obj`, we&#39;re not</span>
+    <span class='comment val'># interested.</span>
+    <span class='rubyid_next next kw'>next</span> <span class='rubyid_unless unless_mod kw'>unless</span> <span class='rubyid_models identifier id'>models</span><span class='dot token'>.</span><span class='rubyid_include? fid id'>include?</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='dot token'>.</span><span class='rubyid_class identifier id'>class</span><span class='rparen token'>)</span>
 
-          <span class='comment val'># Example: if we're updating a subject record and want to update</span>
-          <span class='comment val'># the timestamps of any linked archival object records:</span>
-          <span class='comment val'>#</span>
-          <span class='comment val'>#  * self = ArchivalObject</span>
-          <span class='comment val'>#  * relationship_defn is subject_rlshp</span>
-          <span class='comment val'>#  * obj = #&lt;Subject instance that was updated&gt;</span>
-          <span class='comment val'>#  * their_col = subject_rlshp.subject_id</span>
-          <span class='comment val'>#  * my_col = subject_rlshp.archival_object_id</span>
+    <span class='rubyid_their_ref_columns identifier id'>their_ref_columns</span> <span class='assign token'>=</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_reference_columns_for identifier id'>reference_columns_for</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='dot token'>.</span><span class='rubyid_class identifier id'>class</span><span class='rparen token'>)</span>
+    <span class='rubyid_my_ref_columns identifier id'>my_ref_columns</span> <span class='assign token'>=</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_reference_columns_for identifier id'>reference_columns_for</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='rparen token'>)</span>
+    <span class='rubyid_their_ref_columns identifier id'>their_ref_columns</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_their_col identifier id'>their_col</span><span class='bitor op'>|</span>
+      <span class='rubyid_my_ref_columns identifier id'>my_ref_columns</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_my_col identifier id'>my_col</span><span class='bitor op'>|</span>
 
-          <span class='rubyid_if if kw'>if</span> <span class='rubyid_DB constant id'>DB</span><span class='dot token'>.</span><span class='rubyid_supports_join_updates? fid id'>supports_join_updates?</span>
+        <span class='comment val'># This one type of relationship (between the software agent and</span>
+        <span class='comment val'># anything else) was a particular hotspot when analyzing real-world</span>
+        <span class='comment val'># performance.</span>
+        <span class='comment val'>#</span>
+        <span class='comment val'># Terrible to have to do this, but the MySQL optimizer refuses</span>
+        <span class='comment val'># to use the primary key on agent_software because it (often)</span>
+        <span class='comment val'># only has one row.</span>
+        <span class='comment val'>#</span>
+        <span class='rubyid_if if kw'>if</span> <span class='rubyid_DB constant id'>DB</span><span class='dot token'>.</span><span class='rubyid_supports_join_updates? fid id'>supports_join_updates?</span> <span class='andop op'>&amp;&amp;</span>
+           <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span> <span class='eq op'>==</span> <span class='symbol val'>:agent_software</span> <span class='andop op'>&amp;&amp;</span>
+           <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span> <span class='eq op'>==</span> <span class='symbol val'>:linked_agents_rlshp</span>
+          <span class='rubyid_DB constant id'>DB</span><span class='dot token'>.</span><span class='rubyid_open identifier id'>open</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_db identifier id'>db</span><span class='bitor op'>|</span>
+            <span class='rubyid_id_str identifier id'>id_str</span> <span class='assign token'>=</span> <span class='rubyid_Integer constant id'>Integer</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='dot token'>.</span><span class='rubyid_id identifier id'>id</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='rubyid_to_s identifier id'>to_s</span>
 
-            <span class='rubyid_if if kw'>if</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span> <span class='eq op'>==</span> <span class='symbol val'>:agent_software</span> <span class='andop op'>&amp;&amp;</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span> <span class='eq op'>==</span> <span class='symbol val'>:linked_agents_rlshp</span>
-              <span class='comment val'># Terrible to have to do this, but the MySQL optimizer refuses</span>
-              <span class='comment val'># to use the primary key on agent_software because it (often)</span>
-              <span class='comment val'># only has one row.</span>
-              <span class='rubyid_DB constant id'>DB</span><span class='dot token'>.</span><span class='rubyid_open identifier id'>open</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_db identifier id'>db</span><span class='bitor op'>|</span>
-                <span class='rubyid_id_str identifier id'>id_str</span> <span class='assign token'>=</span> <span class='rubyid_Integer constant id'>Integer</span><span class='lparen token'>(</span><span class='rubyid_obj identifier id'>obj</span><span class='dot token'>.</span><span class='rubyid_id identifier id'>id</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='rubyid_to_s identifier id'>to_s</span>
-
-                <span class='rubyid_db identifier id'>db</span><span class='dot token'>.</span><span class='rubyid_run identifier id'>run</span><span class='lparen token'>(</span><span class='string val'>&quot;UPDATE `agent_software` FORCE INDEX (PRIMARY) &quot;</span> <span class='plus op'>+</span>
-                       <span class='string val'>&quot; INNER JOIN `linked_agents_rlshp` &quot;</span> <span class='plus op'>+</span>
-                       <span class='string val'>&quot;ON (`linked_agents_rlshp`.`agent_software_id` = `agent_software`.`id`) &quot;</span> <span class='plus op'>+</span>
-                       <span class='string val'>&quot;SET `agent_software`.`system_mtime` = NOW() &quot;</span> <span class='plus op'>+</span>
-                       <span class='dstring node'>&quot;WHERE (`linked_agents_rlshp`.`archival_object_id` = #{id_str})&quot;</span><span class='rparen token'>)</span>
-              <span class='rubyid_end end kw'>end</span>
-            <span class='rubyid_else else kw'>else</span>
-              <span class='comment val'># MySQL will optimize this much more aggressively</span>
-              <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='comma token'>,</span> <span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='rubyid_my_col identifier id'>my_col</span><span class='rparen token'>)</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='symbol val'>:id</span><span class='rparen token'>)</span><span class='rparen token'>)</span><span class='dot token'>.</span>
-                <span class='rubyid_filter identifier id'>filter</span><span class='lparen token'>(</span><span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='rubyid_their_col identifier id'>their_col</span><span class='rparen token'>)</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_obj identifier id'>obj</span><span class='dot token'>.</span><span class='rubyid_id identifier id'>id</span><span class='rparen token'>)</span><span class='dot token'>.</span>
-                <span class='rubyid_update identifier id'>update</span><span class='lparen token'>(</span><span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='symbol val'>:system_mtime</span><span class='rparen token'>)</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_now identifier id'>now</span><span class='rparen token'>)</span>
-            <span class='rubyid_end end kw'>end</span>
-
-          <span class='rubyid_else else kw'>else</span>
-            <span class='rubyid_ids_to_touch identifier id'>ids_to_touch</span> <span class='assign token'>=</span> <span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_filter identifier id'>filter</span><span class='lparen token'>(</span><span class='rubyid_their_col identifier id'>their_col</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_obj identifier id'>obj</span><span class='dot token'>.</span><span class='rubyid_id identifier id'>id</span><span class='rparen token'>)</span><span class='dot token'>.</span>
-                           <span class='rubyid_select identifier id'>select</span><span class='lparen token'>(</span><span class='rubyid_my_col identifier id'>my_col</span><span class='rparen token'>)</span>
-            <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_filter identifier id'>filter</span><span class='lparen token'>(</span><span class='symbol val'>:id</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_ids_to_touch identifier id'>ids_to_touch</span><span class='rparen token'>)</span><span class='dot token'>.</span>
-              <span class='rubyid_update identifier id'>update</span><span class='lparen token'>(</span><span class='symbol val'>:system_mtime</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_now identifier id'>now</span><span class='rparen token'>)</span>
+            <span class='rubyid_db identifier id'>db</span><span class='dot token'>.</span><span class='rubyid_run identifier id'>run</span><span class='lparen token'>(</span><span class='string val'>&quot;UPDATE `agent_software` FORCE INDEX (PRIMARY) &quot;</span> <span class='plus op'>+</span>
+                   <span class='string val'>&quot; INNER JOIN `linked_agents_rlshp` &quot;</span> <span class='plus op'>+</span>
+                   <span class='string val'>&quot;ON (`linked_agents_rlshp`.`agent_software_id` = `agent_software`.`id`) &quot;</span> <span class='plus op'>+</span>
+                   <span class='string val'>&quot;SET `agent_software`.`system_mtime` = NOW() &quot;</span> <span class='plus op'>+</span>
+                   <span class='dstring node'>&quot;WHERE (`linked_agents_rlshp`.`archival_object_id` = #{id_str})&quot;</span><span class='rparen token'>)</span>
           <span class='rubyid_end end kw'>end</span>
+
+          <span class='rubyid_return return kw'>return</span>
         <span class='rubyid_end end kw'>end</span>
+
+        <span class='comment val'># Example: if we&#39;re updating a subject record and want to update</span>
+        <span class='comment val'># the timestamps of any linked archival object records:</span>
+        <span class='comment val'>#</span>
+        <span class='comment val'>#  * self = ArchivalObject</span>
+        <span class='comment val'>#  * relationship_defn is subject_rlshp</span>
+        <span class='comment val'>#  * obj = #&lt;Subject instance that was updated&gt;</span>
+        <span class='comment val'>#  * their_col = subject_rlshp.subject_id</span>
+        <span class='comment val'>#  * my_col = subject_rlshp.archival_object_id</span>
+
+
+        <span class='comment val'># Join our model class table to the relationship that links it to `obj`</span>
+        <span class='comment val'>#</span>
+        <span class='comment val'># For example: join ArchivalObject to subject_rlshp</span>
+        <span class='comment val'>#              join Instance to instance_do_link_rlshp</span>
+        <span class='rubyid_base_ds identifier id'>base_ds</span> <span class='assign token'>=</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='comma token'>,</span>
+                            <span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='rubyid_my_col identifier id'>my_col</span><span class='rparen token'>)</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span>
+                                   <span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='symbol val'>:id</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+
+        <span class='comment val'># Limit only to the object of interest--we only care about records</span>
+        <span class='comment val'># involved in a relationship with the record that was updated (obj)</span>
+        <span class='rubyid_base_ds identifier id'>base_ds</span> <span class='assign token'>=</span> <span class='rubyid_base_ds identifier id'>base_ds</span><span class='dot token'>.</span><span class='rubyid_filter identifier id'>filter</span><span class='lparen token'>(</span><span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_relationship_defn identifier id'>relationship_defn</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='rubyid_their_col identifier id'>their_col</span><span class='rparen token'>)</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_obj identifier id'>obj</span><span class='dot token'>.</span><span class='rubyid_id identifier id'>id</span><span class='rparen token'>)</span>
+
+        <span class='comment val'># Now update the mtime of any top-level record that links to that</span>
+        <span class='comment val'># relationship.</span>
+        <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_update_toplevel_mtimes identifier id'>update_toplevel_mtimes</span><span class='lparen token'>(</span><span class='rubyid_base_ds identifier id'>base_ds</span><span class='comma token'>,</span> <span class='rubyid_now identifier id'>now</span><span class='rparen token'>)</span>
       <span class='rubyid_end end kw'>end</span>
     <span class='rubyid_end end kw'>end</span>
   <span class='rubyid_end end kw'>end</span>
@@ -1493,17 +1556,118 @@ to the updated instance and update their mtime.</p>
       <pre class="lines">
 
 
-699
-700
-701
-702</pre>
+715
+716
+717
+718</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 699</span>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 715</span>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_transfer identifier id'>transfer</span><span class='lparen token'>(</span><span class='rubyid_relationship_name identifier id'>relationship_name</span><span class='comma token'>,</span> <span class='rubyid_target identifier id'>target</span><span class='comma token'>,</span> <span class='rubyid_victims identifier id'>victims</span><span class='rparen token'>)</span>
   <span class='rubyid_relationship identifier id'>relationship</span> <span class='assign token'>=</span> <span class='rubyid_find_relationship identifier id'>find_relationship</span><span class='lparen token'>(</span><span class='rubyid_relationship_name identifier id'>relationship_name</span><span class='rparen token'>)</span>
   <span class='rubyid_relationship identifier id'>relationship</span><span class='dot token'>.</span><span class='rubyid_transfer identifier id'>transfer</span><span class='lparen token'>(</span><span class='rubyid_target identifier id'>target</span><span class='comma token'>,</span> <span class='rubyid_victims identifier id'>victims</span><span class='rparen token'>)</span>
+<span class='rubyid_end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="update_toplevel_mtimes-instance_method">
+  
+    #<strong>update_toplevel_mtimes</strong>(dataset, new_mtime)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Given a <code>dataset</code> that links the current record type to some relationship
+type, set the modification time of the nearest top-level record to
+<code>new_mtime</code>.</p>
+
+<p>If the current record type links directly to the relationship (such as an
+Archival Object linking to a Subject), then this is easy: we just update
+the modification time of the Archival Object.</p>
+
+<p>If the current record is a nested record (such as an Instance linked to a
+Digital Object), we want to continue up the chain, linking the Instance
+nested record to its Accession/Resource/Archival Object parent record, and
+then update the modification time of that parent.</p>
+
+<p>And if the nested record has a nested record has a nested record has a
+relationship… well, you get the idea.  We handle the recursive case too!</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+808
+809
+810
+811
+812
+813
+814
+815
+816
+817
+818
+819
+820
+821
+822
+823
+824
+825
+826
+827
+828
+829
+830
+831
+832
+833</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'backend/app/model/mixins/relationships.rb', line 808</span>
+
+<span class='rubyid_def def kw'>def</span> <span class='rubyid_update_toplevel_mtimes identifier id'>update_toplevel_mtimes</span><span class='lparen token'>(</span><span class='rubyid_dataset identifier id'>dataset</span><span class='comma token'>,</span> <span class='rubyid_new_mtime identifier id'>new_mtime</span><span class='rparen token'>)</span>
+  <span class='rubyid_if if kw'>if</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_enclosing_associations identifier id'>enclosing_associations</span><span class='dot token'>.</span><span class='rubyid_empty? fid id'>empty?</span>
+    <span class='comment val'># If we&#39;re not enclosed by anything else, we&#39;re a top-level record.  Do the final update.</span>
+    <span class='rubyid_if if kw'>if</span> <span class='rubyid_DB constant id'>DB</span><span class='dot token'>.</span><span class='rubyid_supports_join_updates? fid id'>supports_join_updates?</span>
+      <span class='comment val'># Fast path!  Use a join update.</span>
+      <span class='rubyid_dataset identifier id'>dataset</span><span class='dot token'>.</span><span class='rubyid_update identifier id'>update</span><span class='lparen token'>(</span><span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='symbol val'>:system_mtime</span><span class='rparen token'>)</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_new_mtime identifier id'>new_mtime</span><span class='rparen token'>)</span>
+    <span class='rubyid_else else kw'>else</span>
+      <span class='comment val'># Slow path.  Subselect.</span>
+      <span class='rubyid_ids_to_touch identifier id'>ids_to_touch</span> <span class='assign token'>=</span> <span class='rubyid_dataset identifier id'>dataset</span><span class='dot token'>.</span><span class='rubyid_select identifier id'>select</span><span class='lparen token'>(</span><span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='symbol val'>:id</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+      <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_filter identifier id'>filter</span><span class='lparen token'>(</span><span class='symbol val'>:id</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_ids_to_touch identifier id'>ids_to_touch</span><span class='rparen token'>)</span><span class='dot token'>.</span><span class='rubyid_update identifier id'>update</span><span class='lparen token'>(</span><span class='symbol val'>:system_mtime</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_new_mtime identifier id'>new_mtime</span><span class='rparen token'>)</span>
+    <span class='rubyid_end end kw'>end</span>
+  <span class='rubyid_else else kw'>else</span>
+    <span class='comment val'># Otherwise, we&#39;re a nested record</span>
+    <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_enclosing_associations identifier id'>enclosing_associations</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_association identifier id'>association</span><span class='bitor op'>|</span>
+      <span class='rubyid_parent_model identifier id'>parent_model</span> <span class='assign token'>=</span> <span class='rubyid_association identifier id'>association</span><span class='lbrack token'>[</span><span class='symbol val'>:model</span><span class='rbrack token'>]</span>
+
+      <span class='comment val'># Link the parent into the current dataset</span>
+      <span class='rubyid_parent_ds identifier id'>parent_ds</span> <span class='assign token'>=</span> <span class='rubyid_dataset identifier id'>dataset</span><span class='dot token'>.</span><span class='rubyid_join identifier id'>join</span><span class='lparen token'>(</span><span class='rubyid_parent_model identifier id'>parent_model</span><span class='comma token'>,</span>
+                               <span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='rubyid_association identifier id'>association</span><span class='lbrack token'>[</span><span class='symbol val'>:key</span><span class='rbrack token'>]</span><span class='rparen token'>)</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span>
+                                      <span class='rubyid_Sequel constant id'>Sequel</span><span class='dot token'>.</span><span class='rubyid_qualify identifier id'>qualify</span><span class='lparen token'>(</span><span class='rubyid_parent_model identifier id'>parent_model</span><span class='dot token'>.</span><span class='rubyid_table_name identifier id'>table_name</span><span class='comma token'>,</span> <span class='symbol val'>:id</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+
+      <span class='comment val'># and tell it to continue!</span>
+      <span class='rubyid_parent_model identifier id'>parent_model</span><span class='dot token'>.</span><span class='rubyid_update_toplevel_mtimes identifier id'>update_toplevel_mtimes</span><span class='lparen token'>(</span><span class='rubyid_parent_ds identifier id'>parent_ds</span><span class='comma token'>,</span> <span class='rubyid_new_mtime identifier id'>new_mtime</span><span class='rparen token'>)</span>
+    <span class='rubyid_end end kw'>end</span>
+  <span class='rubyid_end end kw'>end</span>
 <span class='rubyid_end end kw'>end</span>
 </pre>
     </td>
@@ -1516,10 +1680,11 @@ to the updated instance and update their mtime.</p>
 </div>
 
       <div id="footer">
-  ArchivesSpace Version 20160724-1252 Documentation Generated on Thu Jul 28 18:04:46 2016 by
+  ArchivesSpace Version v2.7.0.a Documentation Generated on Tue Oct  8 14:03:43 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.0 (ruby-1.9.3).
+  0.9.20.
 </div>
+
     </div>
   </body>
 </html>

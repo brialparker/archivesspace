@@ -1,14 +1,16 @@
 class LabelModel < ASpaceExport::ExportModel
   model_for :labels
-  
+
   @ao = Class.new do
-    
+
     def initialize(tree)
-      obj = ArchivalObject.to_jsonmodel(tree['id'])
+      obj = URIResolver.resolve_references( ArchivalObject.to_jsonmodel(tree['id']),
+                                           ['top_container', 'top_container::container_profile',
+                                            'top_container::container_locations'])
       @json = JSONModel::JSONModel(:archival_object).new(obj)
       @tree = tree
     end
-    
+
     def method_missing(meth)
       if @json.respond_to?(meth)
         @json.send(meth)
@@ -16,46 +18,65 @@ class LabelModel < ASpaceExport::ExportModel
         nil
       end
     end
-    
+
     def children
       return nil unless @tree['children']
       @tree['children'].map { |subtree| self.class.new(subtree) }
     end
-  end
-    
 
-  def initialize(obj)
+  end
+
+  attr_reader :file
+
+  def initialize(obj, tree)
     @json = obj
-    @seen_top_containers = []
-    
-    @rows = generate_label_rows(self.children) 
-  end
-  
-  
-  def headers
-    %w(Repository\ Name Resource\ Title  Resource\ Identifier Container Label)
-  end
-  
-  
-  def rows
-    @rows.map {|r| [self.repo_name, self.title, self.identifier] + r }
-  end
-  
+    @tree = tree
 
-  def self.from_aspace_object(obj)
-    labler = self.new(obj)
-    
+    @file = ASUtils.tempfile('labels_')
+    append(headers)
+
+    generate_label_rows(self.children)
+  end
+
+
+  def append(row)
+    CSV.open(@file, 'a', col_sep: "\t") { |csv| csv << row }
+  end
+
+
+  def full_row(row)
+    [self.repo_name, self.title, self.identifier] + row
+  end
+
+
+  def headers
+    %w(
+      Repository\ Name Resource\ Title  Resource\ Identifier Series\ Archival\ Object\ Title
+      Archival\ Object\ Title Container\ Profile Top\ Container Top\ Container\ Barcode
+      SubContainer\ 1 SubContainer\ 2 Current\ Location
+    )
+  end
+
+
+  def stream
+    File.open(@file).each # enumerator for stream response
+  end
+
+
+  def self.from_aspace_object(obj, tree)
+    labler = self.new(obj, tree)
+
     labler
   end
-    
-  
-  def self.from_resource(obj)
-    labler = self.from_aspace_object(obj)
-    
+
+
+  def self.from_resource(obj, tree)
+    labler = self.from_aspace_object(obj, tree)
+
     labler
   end
-  
-  
+
+
   def method_missing(meth)
     if @json.respond_to?(meth)
       @json.send(meth)
@@ -63,14 +84,14 @@ class LabelModel < ASpaceExport::ExportModel
       nil
     end
   end
-  
+
   def identifier
     @identifier ||= [:id_0, :id_1, :id_2, :id_3].map {|i| self.send(i) }.reject {|i| i.nil? }.join("-")
-    
+
     @identifier
   end
-  
-  
+
+
   def repo_name
     if self.repository && self.repository.has_key?('_resolved')
       self.repository['_resolved']['name']
@@ -78,47 +99,72 @@ class LabelModel < ASpaceExport::ExportModel
       "Unknown"
     end
   end
-  
-  
+
+
   def children
-    return nil unless @json.tree.has_key?('_resolved') && @json.tree['_resolved']['children']
-    
+    return nil unless @tree.children
+
     ao_class = self.class.instance_variable_get(:@ao)
-    
-    children = @json.tree['_resolved']['children'].map { |subtree| ao_class.new(subtree) }
-    
-    children
+
+    @tree.children.map { |subtree| ao_class.new(subtree) }
   end
-  
-  
-  def generate_label_rows(objects)
 
-    rows = []
-    
-    objects.each do |obj|
 
-      instances = obj.instances
-      instances.each do |i|
-        if i['sub_container']
-          next if @seen_top_containers.include?(i['sub_container']['top_container']['ref'])
-          @seen_top_containers << i['sub_container']['top_container']['ref']
-        end
-
-        c = i['container']
-        next unless c
-        crow = [] 
-        if c['type_1'] && c['indicator_1'] 
-          crow << "#{c['type_1']} #{c['indicator_1']}"
-        end
-        if c['barcode_1']
-          crow << c['barcode_1']
-        end
-        rows << crow
+  # this is a convenience method to either return either the value from a hash
+  # from an array of keys or a blank string ( if it does not exist )
+  def value_or_blank(hash, keys = [] )
+    keys.reduce(hash) do |memo, k|
+      if memo.is_a?(Hash) && memo[k]
+        memo[k]
+      else
+        ""
       end
-      rows.push(*generate_label_rows(obj.children))
+    end
+  end
+
+  def generate_label_rows(objects)
+    @top_containers ||= []
+    @series ||= ""
+
+    objects.each do |obj|
+      @series = obj.display_string if obj.level == 'series'
+      obj.instances.each do |instance|
+        next unless (sub = instance['sub_container'])
+        # output each unique container per series (a container may be used in multiple series)
+        digest = Digest::SHA1.hexdigest(@series + sub['top_container']['ref'])
+        next if @top_containers.include?(digest)
+        @top_containers << digest
+
+        # We get the Series ( the ancestor AO with the level == 'series' ) and
+        # the name of the AO we're processing
+        container_row = [@series, obj.display_string]
+
+        # Top Container time
+        top = sub['top_container']['_resolved']
+
+        # this will give us:
+        #  "#{name} [#{depth}d, #{height}h, #{width}w #{dimension_units}] extent measured by #{extent_dimension}"
+        container_row << value_or_blank( top, %w( container_profile _resolved display_string ))
+
+        container_row << "#{value_or_blank( top, %w( type ))}: #{value_or_blank( top, %w( indicator ))}"
+
+        container_row << value_or_blank(top, %w( barcode ))
+
+        # these get the grandchild SubContainers of the Top Container
+        # e.g. Carton: 1 and Folder: 71
+        container_row << [ value_or_blank( sub, %w( type_2 )), value_or_blank( sub, %w( indicator_2 ) ) ]
+          .reject { |v| v.empty? }.join(":")
+        container_row << [ value_or_blank( sub, %w( type_3 )), value_or_blank( sub, %w( indicator_3 ) ) ]
+          .reject { |v| v.empty? }.join(":")
+
+
+        current_location = top["container_locations"].find { |loc| loc["status"] === 'current'  } || {}
+        container_row << value_or_blank( current_location, %w( _resolved title  ) )
+
+        append(full_row(container_row))
+      end
+      generate_label_rows(obj.children)
 
     end
-    
-    rows
-  end    
+  end
 end

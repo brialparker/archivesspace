@@ -4,7 +4,7 @@ require_relative 'export_spec_helper'
 require_relative 'container_spec_helper'
 
 
-describe 'Export Labels Mappings ' do
+describe 'Export Labels Mappings' do
 
   #######################################################################
   # FIXTURES
@@ -41,10 +41,7 @@ describe 'Export Labels Mappings ' do
       parent = [true, false].sample ? @archival_objects.keys[rand(@archival_objects.keys.length)] : nil
       a = create(:json_archival_object_normal,  :resource => {:ref => @resource.uri},
                  :parent => parent ? {:ref => parent} : nil,
-                 :instances => [ build(:json_instance,
-                                       :container => build(:json_container, :barcode_1 => nil) )
-                                ]
-    )
+                 :instances => [ build(:json_instance) ])
       a = JSONModel(:archival_object).find(a.id)
       @archival_objects[a.uri] = a
      }
@@ -53,10 +50,7 @@ describe 'Export Labels Mappings ' do
       parent = [true, false].sample ? @archival_objects.keys[rand(@archival_objects.keys.length)] : nil
       a = create(:json_archival_object_normal,  :resource => {:ref => @resource.uri},
                  :parent => parent ? {:ref => parent} : nil,
-                 :instances => [ build(:json_instance,
-                                       :container => build(:json_container, :barcode_1 => nil ) )
-                                ]
-    )
+                 :instances => [ build(:json_instance) ])
       a = JSONModel(:archival_object).find(a.id)
       @archival_objects[a.uri] = a
      }
@@ -77,8 +71,8 @@ describe 'Export Labels Mappings ' do
     end
 
     it "should have the proper values" do
-      # header, parent, 16 arch objs
-      @labels.split("\r").length.should eq(18)
+      # header, 16 arch objs
+      expect(@labels.split("\n").length).to eq(17)
     end
   end
 
@@ -99,7 +93,7 @@ describe 'Export Labels Mappings ' do
 
     it "only lists a top container once" do
       # header and single row
-      @labels.chomp.split("\r").length.should eq(2)
+      expect(@labels.chomp.split("\n").length).to eq(2)
     end
 
   end

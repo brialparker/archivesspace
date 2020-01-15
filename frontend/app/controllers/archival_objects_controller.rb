@@ -12,6 +12,7 @@ class ArchivalObjectsController < ApplicationController
     @archival_object = JSONModel(:archival_object).new._always_valid!
     @archival_object.parent = {'ref' => JSONModel(:archival_object).uri_for(params[:archival_object_id])} if params.has_key?(:archival_object_id)
     @archival_object.resource = {'ref' => JSONModel(:resource).uri_for(params[:resource_id])} if params.has_key?(:resource_id)
+    @archival_object.position = params[:position]
 
     if user_prefs['default_values']
       defaults = DefaultValues.get 'archival_object'
@@ -44,15 +45,24 @@ class ArchivalObjectsController < ApplicationController
                 :on_valid => ->(id){
 
                   success_message = @archival_object.parent ?
-                                      I18n.t("archival_object._frontend.messages.created_with_parent", JSONModelI18nWrapper.new(:archival_object => @archival_object, :resource => @archival_object['resource']['_resolved'], :parent => @archival_object['parent']['_resolved'])) :
-                                      I18n.t("archival_object._frontend.messages.created", JSONModelI18nWrapper.new(:archival_object => @archival_object, :resource => @archival_object['resource']['_resolved']))
-
-                  @refresh_tree_node = true
+                                      I18n.t("archival_object._frontend.messages.created_with_parent", JSONModelI18nWrapper.new(:archival_object => @archival_object, :resource => @archival_object['resource']['_resolved'], :parent => @archival_object['parent']['_resolved']).enable_parse_mixed_content!(url_for(:root))) :
+                                      I18n.t("archival_object._frontend.messages.created", JSONModelI18nWrapper.new(:archival_object => @archival_object, :resource => @archival_object['resource']['_resolved']).enable_parse_mixed_content!(url_for(:root)))
 
                   if params.has_key?(:plus_one)
                     flash[:success] = success_message
                   else
                     flash.now[:success] = success_message
+                  end
+
+                  if @archival_object["is_slug_auto"] == false &&
+                     @archival_object["slug"] == nil &&
+                     params["archival_object"] &&
+                     params["archival_object"]["is_slug_auto"] == "1"
+                     if params.has_key?(:plus_one)
+                       flash[:warning] = I18n.t("slug.autogen_disabled")
+                     else
+                       flash.now[:warning] = I18n.t("slug.autogen_disabled")
+                     end
                   end
 
                   render_aspace_partial :partial => "archival_objects/edit_inline"
@@ -72,12 +82,16 @@ class ArchivalObjectsController < ApplicationController
                 :obj => @archival_object,
                 :on_invalid => ->(){ return render_aspace_partial :partial => "edit_inline" },
                 :on_valid => ->(id){
-                  success_message = parent ?
-                    I18n.t("archival_object._frontend.messages.updated_with_parent", JSONModelI18nWrapper.new(:archival_object => @archival_object, :resource => @archival_object['resource']['_resolved'], :parent => parent)) :
-                    I18n.t("archival_object._frontend.messages.updated", JSONModelI18nWrapper.new(:archival_object => @archival_object, :resource => @archival_object['resource']['_resolved']))
-                  flash.now[:success] = success_message
+                  flash.now[:success] = parent ?
+                    I18n.t("archival_object._frontend.messages.updated_with_parent", JSONModelI18nWrapper.new(:archival_object => @archival_object, :resource => @archival_object['resource']['_resolved'], :parent => parent).enable_parse_mixed_content!(url_for(:root))) :
+                    I18n.t("archival_object._frontend.messages.updated", JSONModelI18nWrapper.new(:archival_object => @archival_object, :resource => @archival_object['resource']['_resolved']).enable_parse_mixed_content!(url_for(:root)))
 
-                  @refresh_tree_node = true
+                  if @archival_object["is_slug_auto"] == false &&
+                     @archival_object["slug"] == nil &&
+                     params["archival_object"] &&
+                     params["archival_object"]["is_slug_auto"] == "1"
+                    flash.now[:warning] = I18n.t("slug.autogen_disabled")
+                  end
 
                   render_aspace_partial :partial => "edit_inline"
                 })
@@ -88,7 +102,7 @@ class ArchivalObjectsController < ApplicationController
     @resource_id = params['resource_id']
     @archival_object = JSONModel(:archival_object).find(params[:id], find_opts)
 
-    flash.now[:info] = I18n.t("archival_object._frontend.messages.suppressed_info", JSONModelI18nWrapper.new(:archival_object => @archival_object)) if @archival_object.suppressed
+    flash.now[:info] = I18n.t("archival_object._frontend.messages.suppressed_info", JSONModelI18nWrapper.new(:archival_object => @archival_object).enable_parse_mixed_content!(url_for(:root))) if @archival_object.suppressed
 
     render_aspace_partial :partial => "archival_objects/show_inline" if inline?
   end
@@ -146,7 +160,7 @@ class ArchivalObjectsController < ApplicationController
       if response.code == '200'
         @archival_object = JSONModel(:archival_object).find(params[:id], find_opts)
 
-        flash[:success] = I18n.t("archival_object._frontend.messages.transfer_success", JSONModelI18nWrapper.new(:archival_object => @archival_object, :resource => @archival_object['resource']['_resolved']))
+        flash[:success] = I18n.t("archival_object._frontend.messages.transfer_success", JSONModelI18nWrapper.new(:archival_object => @archival_object, :resource => @archival_object['resource']['_resolved']).enable_parse_mixed_content!(url_for(:root)))
         redirect_to :controller => :resources, :action => :edit, :id => JSONModel(:resource).id_for(params["transfer"]["ref"]), :anchor => "tree::archival_object_#{params[:id]}"
       else
         raise ASUtils.json_parse(response.body)['error'].to_s
@@ -161,17 +175,32 @@ class ArchivalObjectsController < ApplicationController
 
   def delete
     archival_object = JSONModel(:archival_object).find(params[:id])
-    archival_object.delete
 
-    flash[:success] = I18n.t("archival_object._frontend.messages.deleted", JSONModelI18nWrapper.new(:archival_object => archival_object))
+    previous_record = JSONModel::HTTP.get_json("#{archival_object['uri']}/previous")
 
-    resolver = Resolver.new(archival_object['resource']['ref'])
-    redirect_to resolver.view_uri
+    begin
+      archival_object.delete
+    rescue ConflictException => e
+      flash[:error] = I18n.t("archival_object._frontend.messages.delete_conflict", :error => I18n.t("errors.#{e.conflicts}", :default => e.message))
+      resolver = Resolver.new(archival_object['uri'])
+      return redirect_to resolver.view_uri
+    end
+
+    flash[:success] = I18n.t("archival_object._frontend.messages.deleted", JSONModelI18nWrapper.new(:archival_object => archival_object).enable_parse_mixed_content!(url_for(:root)))
+
+    if previous_record
+      redirect_to :controller => :resources, :action => :show, :id => JSONModel(:resource).id_for(archival_object['resource']['ref']), :anchor => "tree::archival_object_#{JSONModel(:archival_object).id_for(previous_record['uri'])}"
+    else
+      # no previous node, so redirect to the resource
+      resolver = Resolver.new(archival_object['resource']['ref'])
+      redirect_to resolver.view_uri
+    end
   end
 
 
   def rde
     @parent = JSONModel(:archival_object).find(params[:id])
+    @resource_uri = @parent['resource']['ref']
     @children = ArchivalObjectChildren.new
     @exceptions = []
 
@@ -181,6 +210,7 @@ class ArchivalObjectsController < ApplicationController
 
   def add_children
     @parent = JSONModel(:archival_object).find(params[:id])
+    @resource_uri = @parent['resource']['ref']
 
     if params[:archival_record_children].blank? or params[:archival_record_children]["children"].blank?
 
@@ -211,8 +241,13 @@ class ArchivalObjectsController < ApplicationController
         return render :text => I18n.t("rde.messages.success")
       rescue JSONModel::ValidationException => e
         @exceptions = @children.children.collect{|c| JSONModel(:archival_object).from_hash(c, false)._exceptions}
+        
+        if @exceptions.all?(&:blank?)
+          e.errors.each { |key, vals| flash.now[:error] = "#{key} : #{vals.join('<br/>')}" }
+        else
+          flash.now[:error] = I18n.t("rde.messages.rows_with_errors", :count => @exceptions.select{|e| !e.empty?}.length)
+        end
 
-        flash.now[:error] = I18n.t("rde.messages.rows_with_errors", :count => @exceptions.select{|e| !e.empty?}.length)
       end
 
     end
@@ -236,7 +271,7 @@ class ArchivalObjectsController < ApplicationController
     archival_object = JSONModel(:archival_object).find(params[:id])
     archival_object.set_suppressed(true)
 
-    flash[:success] = I18n.t("archival_object._frontend.messages.suppressed", JSONModelI18nWrapper.new(:archival_object => archival_object))
+    flash[:success] = I18n.t("archival_object._frontend.messages.suppressed", JSONModelI18nWrapper.new(:archival_object => archival_object).enable_parse_mixed_content!(url_for(:root)))
     redirect_to(:controller => :resources, :action => :show, :id => JSONModel(:resource).id_for(archival_object['resource']['ref']), :anchor => "tree::archival_object_#{params[:id]}")
   end
 
@@ -245,7 +280,7 @@ class ArchivalObjectsController < ApplicationController
     archival_object = JSONModel(:archival_object).find(params[:id])
     archival_object.set_suppressed(false)
 
-    flash[:success] = I18n.t("archival_object._frontend.messages.unsuppressed", JSONModelI18nWrapper.new(:archival_object => archival_object))
+    flash[:success] = I18n.t("archival_object._frontend.messages.unsuppressed", JSONModelI18nWrapper.new(:archival_object => archival_object).enable_parse_mixed_content!(url_for(:root)))
     redirect_to(:controller => :resources, :action => :show, :id => JSONModel(:resource).id_for(archival_object['resource']['ref']), :anchor => "tree::archival_object_#{params[:id]}")
   end
 

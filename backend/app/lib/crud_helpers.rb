@@ -51,7 +51,7 @@ module CrudHelpers
 
     modified_since_time = Time.at(pagination_data[:modified_since])
     dataset = dataset.where { system_mtime >= modified_since_time }
-    dataset = dataset.order(*order) if order
+    dataset = order ? dataset.order(*order) : dataset.order(:id)
 
     if pagination_data[:page]
       # Classic pagination mode
@@ -99,7 +99,10 @@ module CrudHelpers
   def listing_response(dataset, model)
 
     objs = dataset.respond_to?(:all) ? dataset.all : dataset
-    jsons = model.sequel_to_jsonmodel(objs).map {|json|
+
+    opts = {:calculate_linked_repositories => current_user.can?(:index_system)}
+
+    jsons = model.sequel_to_jsonmodel(objs, opts).map {|json|
       if json.is_a?(JSONModelType)
         json.to_hash(:trusted)
       else
@@ -114,6 +117,7 @@ module CrudHelpers
         :first_page => dataset.page_range.first,
         :last_page => dataset.page_range.last,
         :this_page => dataset.current_page,
+        :total => dataset.pagination_record_count,
         :results => results
       }
     else

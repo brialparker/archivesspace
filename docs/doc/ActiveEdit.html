@@ -6,7 +6,7 @@
 <title>
   Class: ActiveEdit
   
-    &mdash; Documentation by YARD 0.9.0
+    &mdash; Documentation by YARD 0.9.20
   
 </title>
 
@@ -28,7 +28,7 @@
   </head>
   <body>
     <div class="nav_wrap">
-      <iframe id="nav" src="class_list.html"></iframe>
+      <iframe id="nav" src="class_list.html?1"></iframe>
       <div id="resizer"></div>
     </div>
 
@@ -36,7 +36,7 @@
       <div id="header">
         <div id="menu">
   
-    <a href="_index.html">Index (A)</a> &raquo;
+    <a href="alpha_index.html">Index (A)</a> &raquo;
     
     
     <span class="title">ActiveEdit</span>
@@ -58,8 +58,6 @@
 </div>
         <div class="clear"></div>
       </div>
-
-      <iframe id="search_frame" src="class_list.html"></iframe>
 
       <div id="content"><h1>Class: ActiveEdit
   
@@ -104,18 +102,24 @@
 </div>
 
 
-  <h2>Constant Summary</h2>
-  <dl class="constants">
-    
-      <dt id="EXPIRE_SECONDS-constant" class="">EXPIRE_SECONDS =
-        <div class="docstring">
+
+  
+    <h2>
+      Constant Summary
+      <small><a href="#" class="constants_summary_toggle">collapse</a></small>
+    </h2>
+
+    <dl class="constants">
+      
+        <dt id="EXPIRE_SECONDS-constant" class="">EXPIRE_SECONDS =
+          <div class="docstring">
   <div class="discussion">
-    <p>If we haven&#8217;t seen an update from a client in this amount of time, assume
-they&#8217;ve stopped editing.</p>
+    <p>If we haven’t seen an update from a client in this amount of time, assume
+they’ve stopped editing.</p>
 
 <p>This value needs to be at least as much as the client interval plus the
 SYNC_WITH_BACKEND_SECONDS value from the frontend.  We add a bit of a margin
-so that we&#8217;re not expiring messages immediately after receiving them.</p>
+so that we’re not expiring messages immediately after receiving them.</p>
 
 
   </div>
@@ -124,11 +128,13 @@ so that we&#8217;re not expiring messages immediately after receiving them.</p>
   
 
 </div>
-      </dt>
-      <dd><pre class="code"><span class='integer val'>30</span>
+        </dt>
+        <dd><pre class="code"><span class='integer val'>30</span>
 </pre></dd>
-    
-  </dl>
+      
+    </dl>
+  
+
 
 
 
@@ -323,10 +329,10 @@ so that we&#8217;re not expiring messages immediately after receiving them.</p>
 
 <span class='rubyid_def def kw'>def</span> <span class='rubyid_self self kw'>self</span><span class='dot token'>.</span><span class='rubyid_update_with identifier id'>update_with</span><span class='lparen token'>(</span><span class='rubyid_active_edits identifier id'>active_edits</span><span class='rparen token'>)</span>
   <span class='comment val'># Add the new ones</span>
-  <span class='rubyid_active_edits identifier id'>active_edits</span><span class='lbrack token'>[</span><span class='string val'>'active_edits'</span><span class='rbrack token'>]</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_edit identifier id'>edit</span><span class='bitor op'>|</span>
-    <span class='rubyid_ActiveEdit constant id'>ActiveEdit</span><span class='dot token'>.</span><span class='rubyid_create identifier id'>create</span><span class='lparen token'>(</span><span class='symbol val'>:uri</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_edit identifier id'>edit</span><span class='lbrack token'>[</span><span class='string val'>'uri'</span><span class='rbrack token'>]</span><span class='comma token'>,</span>
-                      <span class='symbol val'>:operator</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_edit identifier id'>edit</span><span class='lbrack token'>[</span><span class='string val'>'user'</span><span class='rbrack token'>]</span><span class='comma token'>,</span>
-                      <span class='symbol val'>:timestamp</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_Time constant id'>Time</span><span class='dot token'>.</span><span class='rubyid_parse identifier id'>parse</span><span class='lparen token'>(</span><span class='rubyid_edit identifier id'>edit</span><span class='lbrack token'>[</span><span class='string val'>'time'</span><span class='rbrack token'>]</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
+  <span class='rubyid_active_edits identifier id'>active_edits</span><span class='lbrack token'>[</span><span class='string val'>&#39;active_edits&#39;</span><span class='rbrack token'>]</span><span class='dot token'>.</span><span class='rubyid_each identifier id'>each</span> <span class='rubyid_do do kw'>do</span> <span class='bitor op'>|</span><span class='rubyid_edit identifier id'>edit</span><span class='bitor op'>|</span>
+    <span class='rubyid_ActiveEdit constant id'>ActiveEdit</span><span class='dot token'>.</span><span class='rubyid_create identifier id'>create</span><span class='lparen token'>(</span><span class='symbol val'>:uri</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_edit identifier id'>edit</span><span class='lbrack token'>[</span><span class='string val'>&#39;uri&#39;</span><span class='rbrack token'>]</span><span class='comma token'>,</span>
+                      <span class='symbol val'>:operator</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_edit identifier id'>edit</span><span class='lbrack token'>[</span><span class='string val'>&#39;user&#39;</span><span class='rbrack token'>]</span><span class='comma token'>,</span>
+                      <span class='symbol val'>:timestamp</span> <span class='assign token'>=</span><span class='gt op'>&gt;</span> <span class='rubyid_Time constant id'>Time</span><span class='dot token'>.</span><span class='rubyid_parse identifier id'>parse</span><span class='lparen token'>(</span><span class='rubyid_edit identifier id'>edit</span><span class='lbrack token'>[</span><span class='string val'>&#39;time&#39;</span><span class='rbrack token'>]</span><span class='rparen token'>)</span><span class='rparen token'>)</span>
   <span class='rubyid_end end kw'>end</span>
 
   <span class='comment val'># Expire the old ones</span>
@@ -361,10 +367,11 @@ so that we&#8217;re not expiring messages immediately after receiving them.</p>
 </div>
 
       <div id="footer">
-  ArchivesSpace Version 20160724-1252 Documentation Generated on Thu Jul 28 18:04:55 2016 by
+  ArchivesSpace Version v2.7.0.a Documentation Generated on Tue Oct  8 14:03:51 2019 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.0 (ruby-1.9.3).
+  0.9.20.
 </div>
+
     </div>
   </body>
 </html>

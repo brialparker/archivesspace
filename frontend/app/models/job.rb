@@ -25,26 +25,25 @@ class Job
       response = JSONModel::HTTP.post_form("#{JSONModel(:job).uri_for(nil)}_with_files",
                                            Hash[upload_files].merge('job' => @job.to_json),
                                            :multipart_form_data)
-
       ASUtils.json_parse(response.body)
 
     else
 
       @job.save
 
-      {:uri => @job.uri}
+      {'uri' => @job.uri}
     end
 
   end
 
 
   def self.active
-    JSONModel::HTTP::get_json(JSONModel(:job).uri_for("active"), "resolve[]" => "repository")
+    JSONModel::HTTP::get_json(JSONModel(:job).uri_for("active"), "resolve[]" => "repository") || {'results' => []}
   end
 
 
   def self.archived(page)
-    JSONModel::HTTP::get_json(JSONModel(:job).uri_for("archived"), :page => page, "resolve[]" => "repository")
+    JSONModel::HTTP::get_json(JSONModel(:job).uri_for("archived"), :page => page, "resolve[]" => "repository") || {'results' => []}
   end
 
 

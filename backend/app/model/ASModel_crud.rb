@@ -162,15 +162,6 @@ module ASModel
 
           # Tell the nested record to clear its own nested records
           Array(self.send(nested_record_defn[:association][:name])).each do |nested_record|
-
-            # not stoked on this ,but some one_to_one's (collection_management
-            # ) get indexed with an id that refs the parent. so we need to
-            # tombstone the uri that points back to the parent uri
-            if nested_record_defn[:association][:type] == :one_to_one
-              context_uri =  "#{self.uri}##{self.class.to_s.downcase}_#{nested_record.class.to_s.underscore}"
-              Tombstone.create(:uri => context_uri)
-            end
-            
             nested_record.delete
           end
         elsif nested_record_defn[:association][:type] === :many_to_many
@@ -227,6 +218,10 @@ module ASModel
 
       self.class.fire_update(json, self)
 
+      if AppConfig[:arks_enabled] && !ArkName.ark_name_exists?(id, self.class)
+        self.create_ark_name
+      end
+
       self
     end
 
@@ -240,6 +235,9 @@ module ASModel
 
       successfully_deleted_models = []
       last_error = nil
+
+      #delete ARK Name (if exists) first
+      self.delete_ark_name
 
       while true
         progressed = false
@@ -257,8 +255,12 @@ module ASModel
 
           if model.my_jsonmodel(true)
             ids_to_delete.each do |id|
-              deleted_uri = model.my_jsonmodel(true).
-                                  uri_for(id, :repo_id => model.active_repository)
+              deleted_model = model.my_jsonmodel(true)
+
+              # ArkNames don't have URIs, so they are deleted above
+              unless model == ArkName
+                deleted_uri = deleted_model.uri_for(id, :repo_id => model.active_repository)
+              end
 
               if deleted_uri
                 deleted_uris << deleted_uri
@@ -327,6 +329,25 @@ module ASModel
       @system_modified = true
     end
 
+    def create_ark_name
+      if self.class == Resource
+        ArkName.create_from_resource(self)
+      end
+
+      if self.class == ArchivalObject
+        ArkName.create_from_archival_object(self)
+      end
+    end
+
+    def delete_ark_name
+      if self.class == Resource
+        ArkName.first(:resource_id => self.id).delete unless ArkName.first(:resource_id => self.id).nil?
+      end
+
+      if self.class == ArchivalObject
+        ArkName.first(:archival_object_id => self.id).delete unless ArkName.first(:archival_object_id => self.id).nil?
+      end
+    end
 
     module ClassMethods
 
@@ -350,6 +371,7 @@ module ASModel
         fire_update(json, obj)
 
         obj.refresh
+        obj.create_ark_name if AppConfig[:arks_enabled]
         obj
       end
 
@@ -417,7 +439,29 @@ module ASModel
 
         opts[:is_array] = true if !opts.has_key?(:is_array)
 
+        # Store our association on the nested record's model so we can walk back
+        # the other way.
+        ArchivesSpaceService.loaded_hook do
+          nested_model = Kernel.const_get(opts[:association][:class_name])
+          nested_model.add_enclosing_association(opts[:association])
+        end
+
         nested_records << opts
+      end
+
+
+      # Record the association of the record that encloses this one.  For
+      # example, an Archival Object encloses an Instance record because an
+      # Instance is a nested record of an Archival Object.
+      def add_enclosing_association(association)
+        @enclosing_associations ||= []
+        @enclosing_associations << association
+      end
+
+      # If this is a nested record, return the list of associations that link us
+      # back to our parent(s).  Top-level records just return an empty list.
+      def enclosing_associations
+        @enclosing_associations || []
       end
 
 
@@ -482,17 +526,26 @@ module ASModel
 
 
       def to_jsonmodel(obj, opts = {})
-        if obj.is_a? Integer
-          # An ID.  Get the Sequel row for it.
+        is_id_query     = obj.is_a?(Integer)
+        is_string_query = obj.is_a?(String) && opts[:query]
+
+        if is_id_query || is_string_query
           ds = if self.model_scope == :repository
                  self.this_repo
                else
                  self
                end
 
-          obj = ds.eager(get_nested_graph).filter(:id => obj).all[0]
-          raise NotFoundException.new("#{self} not found") unless obj
+          # An ID.  Get the Sequel row for it.
+          if is_id_query
+            obj = ds.eager(get_nested_graph).filter(:id => obj).all[0]
 
+          # If we have a string and query option, attempt to look up by querying string value against column name.
+          elsif is_string_query
+            obj = ds.eager(get_nested_graph).filter(opts[:query].to_sym => obj).all[0]
+          end
+
+          raise NotFoundException.new("#{self} not found") unless obj
           obj.eagerly_load!
         end
 
@@ -502,6 +555,13 @@ module ASModel
 
       def handle_delete(ids_to_delete)
         self.filter(:id => ids_to_delete).delete
+      end
+
+
+      def update_mtime_for_repo_id(repo_id)
+        if model_scope == :repository
+          self.dataset.filter(:repo_id => repo_id).update(:system_mtime => Time.now) if self.dataset.columns.include? :repo_id
+        end
       end
 
 

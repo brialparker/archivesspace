@@ -1,11 +1,12 @@
 require 'uri'
 require 'barcode_check'
+require 'advanced_query_builder'
 
 class TopContainersController < ApplicationController
 
-  set_access_control  "view_repository" => [:show, :typeahead, :bulk_operations_browse],
+  set_access_control  "view_repository" => [:bulk_operations_browse, :bulk_operation_search, :index, :show, :typeahead],
                       "update_container_record" => [:new, :create, :edit, :update],
-                      "manage_container_record" => [:index, :delete, :batch_delete, :bulk_operations, :bulk_operation_search, :bulk_operation_update, :update_barcodes, :update_locations]
+                      "manage_container_record" => [:delete, :batch_delete, :bulk_operations, :bulk_operation_update, :update_barcodes, :update_locations]
 
 
   def index
@@ -15,7 +16,13 @@ class TopContainersController < ApplicationController
   def new
     @top_container = JSONModel(:top_container).new._always_valid!
 
-    render_aspace_partial :partial => "top_containers/new" if inline?
+    if inline?
+      render_aspace_partial(:partial => "top_containers/new",
+                            :locals => {
+                              :small => params[:small],
+                              :created_for_collection => params[:created_for_collection]
+                            })
+    end
   end
 
 
@@ -90,7 +97,7 @@ class TopContainersController < ApplicationController
     search_params = params_for_backend_search
 
     search_params["q"] = "display_string:#{search_params["q"]}"
-    
+
     search_params = search_params.merge(search_filter_for(params[:uri]))
     search_params = search_params.merge("sort" => "typeahead_sort_key_u_sort asc")
 
@@ -139,7 +146,7 @@ class TopContainersController < ApplicationController
     else
       render :text => "You must provide a field to update.", :status => 500
     end
-      
+
     response = JSONModel::HTTP::post_form(post_uri, post_params)
     result = ASUtils.json_parse(response.body)
 
@@ -215,8 +222,23 @@ class TopContainersController < ApplicationController
   def search_filter_for(uri)
     return {} if uri.blank?
 
+    # filter for containers in this collection
+    # or that were created for this collection
+    # if they are currently not associated with any collection
+    # this is helpful in situations like RDE
+    # where the top_container is created and should be linkable
+    # to other records in the collection before any of them are saved
+
+    created_for_query = AdvancedQueryBuilder.new
+    created_for_query.and('created_for_collection_u_sstr', uri, 'text', true)
+    created_for_query.and('collection_uri_u_sstr', '*', 'text', true, true)
+
+    top_or_query = AdvancedQueryBuilder.new
+    top_or_query.or('collection_uri_u_sstr', uri, 'text', true)
+    top_or_query.or(created_for_query)
+
     return {
-      "filter_term[]" => [{"collection_uri_u_sstr" => uri}.to_json]
+      'filter' => AdvancedQueryBuilder.new.and(top_or_query).build.to_json
     }
   end
 
@@ -226,34 +248,53 @@ class TopContainersController < ApplicationController
                                                       'type[]' => ['top_container']
                                                     })
 
-    filter_terms = []
-    simple_filters = []
+    builder = AdvancedQueryBuilder.new
 
-    filter_terms.push({'collection_uri_u_sstr' => params['collection_resource']['ref']}.to_json) if params['collection_resource']
-    filter_terms.push({'collection_uri_u_sstr' => params['collection_accession']['ref']}.to_json) if params['collection_accession']
+    if params['collection_resource']
+      builder.and('collection_uri_u_sstr', params['collection_resource']['ref'], 'text', literal = true)
+    end
 
-    filter_terms.push({'container_profile_uri_u_sstr' => params['container_profile']['ref']}.to_json) if params['container_profile']
-    filter_terms.push({'location_uri_u_sstr' => params['location']['ref']}.to_json) if params['location']
+    if params['collection_accession']
+      builder.and('collection_uri_u_sstr', params['collection_accession']['ref'], 'text', literal = true)
+    end
+
+    if params['container_profile']
+      builder.and('container_profile_uri_u_sstr', params['container_profile']['ref'], 'text', literal = true)
+    end
+
+    if params['location']
+      builder.and('location_uri_u_sstr', params['location']['ref'], 'text', literal = true)
+    end
+
     unless params['exported'].blank?
-      filter_terms.push({'exported_u_sbool' => (params['exported'] == "yes" ? true : false)}.to_json)
-    end
-    unless params['empty'].blank?
-      filter_terms.push({'empty_u_sbool' => (params['empty'] == "yes" ? true : false)}.to_json)
-    end
-    unless params['barcodes'].blank?
-      simple_filters.push(ASUtils.wrap(params['barcodes'].split(" ")).map{|barcode|
-        "barcode_u_sstr:#{barcode}"
-      }.join(" OR "))
+      builder.and('exported_u_sbool',
+                  (params['exported'] == "yes" ? true : false),
+                  'boolean')
     end
 
-    if simple_filters.empty? && filter_terms.empty? && params['q'].blank?
+    unless params['empty'].blank?
+      builder.and('empty_u_sbool', (params['empty'] == "yes" ? true : false), 'boolean')
+    end
+
+    unless params['barcodes'].blank?
+      barcode_query = AdvancedQueryBuilder.new
+
+      ASUtils.wrap(params['barcodes'].split(" ")).each do |barcode|
+        barcode_query.or('barcode_u_sstr', barcode)
+      end
+
+      unless barcode_query.empty?
+        builder.and(barcode_query)
+      end
+    end
+
+    if builder.empty? && params['q'].blank?
       raise MissingFilterException.new
     end
 
-    unless filter_terms.empty? && simple_filters.empty?
+    unless builder.empty?
       search_params = search_params.merge({
-                                            "filter_term[]" => filter_terms,
-                                            "simple_filter[]" => simple_filters
+                                            "filter" => builder.build.to_json,
                                           })
     end
 

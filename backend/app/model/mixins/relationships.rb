@@ -67,12 +67,12 @@ AbstractRelationship = Class.new(Sequel::Model) do
       # Suppress this new relationship if it points to a suppressed record
       values[:suppressed] = 1
     end
-   
-    # some objects ( like events? ) seem to leak their ids into the mix. 
+
+    # some objects ( like events? ) seem to leak their ids into the mix.
     values.reject! { |key| key == :id or key == "id"  }
     if ( obj1.is_a?(Location) or obj2.is_a?(Location) )
       values.reject! { |key| key == :jsonmodel_type or key == "jsonmodel_type"  }
-    end 
+    end
     self.create(values)
   end
 
@@ -94,8 +94,16 @@ AbstractRelationship = Class.new(Sequel::Model) do
 
     victims_by_model.each do |victim_model, victims|
 
+      # If we're merging a record of type A with relationship R into a record of
+      # type B, type B must also support that relationship type.  If it doesn't,
+      # we risk losing data through the merge and should abort.
+      #
       unless participating_models.include?(victim_model)
-        raise ReferenceError.new("This class doesn't belong to relationship #{self}: #{victim.class}")
+        found = self.find_by_participant_ids(victim_model, victims.map(&:id))
+
+        unless found.empty?
+          raise ReferenceError.new("#{victim_model} to be merged has data for relationship #{self}, but target record doesn't support it.")
+        end
       end
 
       victim_columns = self.reference_columns_for(victim_model)
@@ -411,6 +419,16 @@ module Relationships
 
 
   def transfer_to_repository(repository, transfer_group = [])
+    if transfer_group.empty?
+      do_id = self.class == DigitalObject ? self[:id] : 0
+    else
+      do_id = transfer_group.first.class == DigitalObject ? transfer_group.first[:id] : 0
+    end
+
+    unless do_id == 0
+      return unless do_transferable?(do_id)
+    end
+
     # When a record is being transferred to another repository, any
     # relationships it has to records within the current repository must be
     # cleared.
@@ -433,6 +451,46 @@ module Relationships
     end
 
     super
+  end
+
+
+  def do_transferable?(do_id)
+    # ANW-151: Digital objects should not be transferable if they have instance links to other repository-scoped record types. If not transferrable, we throw an error and abort the transfer.
+    do_relationship = DigitalObject.find_relationship(:instance_do_link)
+
+    instances = do_relationship
+    .select(:instance_id).filter(:digital_object_id => do_id)
+    .map {|row| row[:instance_id]}
+
+    if instances.empty?
+      true
+    else
+      do_has_link_error(instances)
+      false
+    end
+  end
+
+
+  def do_has_link_error(instances)
+    # Abort the transfer and provide the list of top-level records that are preventing it from completing.
+    exception = TransferConstraintError.new
+
+    ASModel.all_models.each do |model|
+      next unless model.associations.include?(:instance)
+
+      model
+        .eager_graph(:instance)
+        .filter(:instance__id => instances)
+        .select(Sequel.qualify(model.table_name, :id))
+        .each do |row|
+        exception.add_conflict(model.my_jsonmodel.uri_for(row[:id], :repo_id => self.class.active_repository),
+                        {:json_property => 'instances',
+                         :message => "DIGITAL_OBJECT_HAS_LINK"})
+        end
+    end
+
+    raise exception
+    return
   end
 
 
@@ -527,6 +585,11 @@ module Relationships
           model.include(Relationships)
           model.add_relationship_dependency(opts[:name], base)
         end
+
+        # Give the new relationship class a name to help with debugging
+        # Example: Relationships::ResourceSubject
+        Relationships.const_set(self.name + opts[:name].to_s.camelize, clz)
+
       end
     end
 
@@ -713,53 +776,111 @@ module Relationships
       relationships.map do |relationship_defn|
         models = relationship_defn.participating_models
 
-        if models.include?(obj.class)
-          their_ref_columns = relationship_defn.reference_columns_for(obj.class)
-          my_ref_columns = relationship_defn.reference_columns_for(self)
-          their_ref_columns.each do |their_col|
-            my_ref_columns.each do |my_col|
+        # If this relationship doesn't link to records of type `obj`, we're not
+        # interested.
+        next unless models.include?(obj.class)
 
-              # Example: if we're updating a subject record and want to update
-              # the timestamps of any linked archival object records:
-              #
-              #  * self = ArchivalObject
-              #  * relationship_defn is subject_rlshp
-              #  * obj = #<Subject instance that was updated>
-              #  * their_col = subject_rlshp.subject_id
-              #  * my_col = subject_rlshp.archival_object_id
+        their_ref_columns = relationship_defn.reference_columns_for(obj.class)
+        my_ref_columns = relationship_defn.reference_columns_for(self)
+        their_ref_columns.each do |their_col|
+          my_ref_columns.each do |my_col|
 
-              if DB.supports_join_updates?
+            # This one type of relationship (between the software agent and
+            # anything else) was a particular hotspot when analyzing real-world
+            # performance.
+            #
+            # Terrible to have to do this, but the MySQL optimizer refuses
+            # to use the primary key on agent_software because it (often)
+            # only has one row.
+            #
+            if DB.supports_join_updates? &&
+               self.table_name == :agent_software &&
+               relationship_defn.table_name == :linked_agents_rlshp
+              DB.open do |db|
+                id_str = Integer(obj.id).to_s
 
-                if self.table_name == :agent_software && relationship_defn.table_name == :linked_agents_rlshp
-                  # Terrible to have to do this, but the MySQL optimizer refuses
-                  # to use the primary key on agent_software because it (often)
-                  # only has one row.
-                  DB.open do |db|
-                    id_str = Integer(obj.id).to_s
-
-                    db.run("UPDATE `agent_software` FORCE INDEX (PRIMARY) " +
-                           " INNER JOIN `linked_agents_rlshp` " +
-                           "ON (`linked_agents_rlshp`.`agent_software_id` = `agent_software`.`id`) " +
-                           "SET `agent_software`.`system_mtime` = NOW() " +
-                           "WHERE (`linked_agents_rlshp`.`archival_object_id` = #{id_str})")
-                  end
-                else
-                  # MySQL will optimize this much more aggressively
-                  self.join(relationship_defn, Sequel.qualify(relationship_defn.table_name, my_col) => Sequel.qualify(self.table_name, :id)).
-                    filter(Sequel.qualify(relationship_defn.table_name, their_col) => obj.id).
-                    update(Sequel.qualify(self.table_name, :system_mtime) => now)
-                end
-
-              else
-                ids_to_touch = relationship_defn.filter(their_col => obj.id).
-                               select(my_col)
-                self.filter(:id => ids_to_touch).
-                  update(:system_mtime => now)
+                db.run("UPDATE `agent_software` FORCE INDEX (PRIMARY) " +
+                       " INNER JOIN `linked_agents_rlshp` " +
+                       "ON (`linked_agents_rlshp`.`agent_software_id` = `agent_software`.`id`) " +
+                       "SET `agent_software`.`system_mtime` = NOW() " +
+                       "WHERE (`linked_agents_rlshp`.`archival_object_id` = #{id_str})")
               end
+
+              return
             end
+
+            # Example: if we're updating a subject record and want to update
+            # the timestamps of any linked archival object records:
+            #
+            #  * self = ArchivalObject
+            #  * relationship_defn is subject_rlshp
+            #  * obj = #<Subject instance that was updated>
+            #  * their_col = subject_rlshp.subject_id
+            #  * my_col = subject_rlshp.archival_object_id
+
+
+            # Join our model class table to the relationship that links it to `obj`
+            #
+            # For example: join ArchivalObject to subject_rlshp
+            #              join Instance to instance_do_link_rlshp
+            base_ds = self.join(relationship_defn,
+                                Sequel.qualify(relationship_defn.table_name, my_col) =>
+                                       Sequel.qualify(self.table_name, :id))
+
+            # Limit only to the object of interest--we only care about records
+            # involved in a relationship with the record that was updated (obj)
+            base_ds = base_ds.filter(Sequel.qualify(relationship_defn.table_name, their_col) => obj.id)
+
+            # Now update the mtime of any top-level record that links to that
+            # relationship.
+            self.update_toplevel_mtimes(base_ds, now)
           end
         end
       end
     end
+
+    # Given a `dataset` that links the current record type to some relationship
+    # type, set the modification time of the nearest top-level record to
+    # `new_mtime`.
+    #
+    # If the current record type links directly to the relationship (such as an
+    # Archival Object linking to a Subject), then this is easy: we just update
+    # the modification time of the Archival Object.
+    #
+    # If the current record is a nested record (such as an Instance linked to a
+    # Digital Object), we want to continue up the chain, linking the Instance
+    # nested record to its Accession/Resource/Archival Object parent record, and
+    # then update the modification time of that parent.
+    #
+    # And if the nested record has a nested record has a nested record has a
+    # relationship... well, you get the idea.  We handle the recursive case too!
+    #
+    def update_toplevel_mtimes(dataset, new_mtime)
+      if self.enclosing_associations.empty?
+        # If we're not enclosed by anything else, we're a top-level record.  Do the final update.
+        if DB.supports_join_updates?
+          # Fast path!  Use a join update.
+          dataset.update(Sequel.qualify(self.table_name, :system_mtime) => new_mtime)
+        else
+          # Slow path.  Subselect.
+          ids_to_touch = dataset.select(Sequel.qualify(self.table_name, :id))
+          self.filter(:id => ids_to_touch).update(:system_mtime => new_mtime)
+        end
+      else
+        # Otherwise, we're a nested record
+        self.enclosing_associations.each do |association|
+          parent_model = association[:model]
+
+          # Link the parent into the current dataset
+          parent_ds = dataset.join(parent_model,
+                                   Sequel.qualify(self.table_name, association[:key]) =>
+                                          Sequel.qualify(parent_model.table_name, :id))
+
+          # and tell it to continue!
+          parent_model.update_toplevel_mtimes(parent_ds, new_mtime)
+        end
+      end
+    end
+
   end
 end

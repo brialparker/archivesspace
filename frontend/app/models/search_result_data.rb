@@ -54,7 +54,7 @@ class SearchResultData
   end
 
   def facet_label_for_filter(filter)
-    filter_json = JSON.parse(filter)
+    filter_json = ASUtils.json_parse(filter)
     facet = filter_json.keys[0]
     term = filter_json[facet]
 
@@ -67,13 +67,27 @@ class SearchResultData
 
   def facets_for_filter
     facet_data_for_filter = @facet_data.clone
-    facet_data_for_filter.each {|facet_group, facets| 
+    facet_data_for_filter.each {|facet_group, facets|
       facets.delete_if{|facet, facet_map|
         facet_map[:count] === @search_data['total_hits']
       }
     }
     facet_data_for_filter.delete_if {|facet_group, facets| facets.empty?}
+    facet_data_for_filter.each do |facet_group, facets|
+      facet_data_for_filter[facet_group] = sort_facets(facet_group, facets)
+    end
     facet_data_for_filter
+  end
+
+  def sort_facets(facet_group, facets)
+    case facet_group
+    when 'accession_date_year'
+      f = facets.sort { |a, b| (b[0].to_i <=> a[0].to_i) * (AppConfig[:sort_accession_date_filter_asc] ? -1 : 1) }.to_h
+      f['9999'][:label] = I18n.t("accession.accession_date_unknown") if f['9999']
+      f
+    else
+      facets
+    end
   end
 
   def facet_display_string(facet_group, facet)
@@ -114,6 +128,26 @@ class SearchResultData
 
     if facet_group === "classification_path"
       return ClassificationHelper.format_classification(ASUtils.json_parse(facet))
+    end
+
+    if facet_group === "assessment_review_required"
+      return I18n.t("assessment._frontend.assessment_review_required.#{facet}_value")
+    end
+
+    if facet_group === "assessment_sensitive_material"
+      return I18n.t("assessment._frontend.assessment_sensitive_material.#{facet}_value")
+    end
+
+    if facet_group === "assessment_inactive"
+      return I18n.t("assessment._frontend.assessment_inactive.#{facet}_value")
+    end
+
+    if facet_group === "assessment_record_types"
+      return I18n.t("#{facet}._singular", :default => facet)
+    end
+
+    if facet_group === "assessment_completed"
+      return I18n.t("assessment._frontend.assessment_completed.#{facet}_value")
     end
 
     facet
@@ -236,6 +270,10 @@ class SearchResultData
     ["subjects", "publish", "digital_object_type", "level", "primary_type"]
   end
 
+  def self.CONTAINER_PROFILE_FACETS
+    ["container_profile_width_u_sstr", "container_profile_height_u_sstr", "container_profile_depth_u_sstr", "container_profile_dimension_units_u_sstr"]
+  end
+
   def self.LOCATION_FACETS
     ["temporary", "building", "floor", "room", "area", "location_profile_display_string_u_ssort"]
   end
@@ -254,6 +292,10 @@ class SearchResultData
 
   def self.CLASSIFICATION_FACETS
     []
+  end
+
+  def self.ASSESSMENT_FACETS
+    ['assessment_record_types', 'assessment_surveyors', 'assessment_review_required', 'assessment_reviewers', 'assessment_completed', 'assessment_inactive', 'assessment_survey_year', 'assessment_sensitive_material']
   end
 
 

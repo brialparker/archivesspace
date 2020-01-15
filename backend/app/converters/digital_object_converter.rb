@@ -25,11 +25,6 @@ class DigitalObjectConverter < Converter
   end
 
 
-  def self.profile
-    "Convert Digital Object Records from a CSV file"
-  end
-
-
   def self.configure
     {
       # 1. Map the cell data to schemas or handlers
@@ -110,7 +105,9 @@ class DigitalObjectConverter < Converter
 
       'digital_object_cataloged_note' => 'collection_management.cataloged_note',
 
-      'digital_object_language' => 'd.language',
+      'digital_object_language' => 'lang_material.language',
+      'digital_object_script' => 'lang_material.script',
+
       'digital_object_level' => 'd.level',
       'digital_object_publish' => [normalize_boolean, 'd.publish'],
       'digital_object_type' => 'd.digital_object_type',
@@ -167,7 +164,7 @@ class DigitalObjectConverter < Converter
       'user_defined_enum_4' => 'user_defined.enum_4',
 
       'file_version_file_uri' => 'file_version.file_uri',
-      'file_version_publish' => 'file_version.publish',
+      'file_version_publish' => [normalize_boolean, 'file_version.publish'],
       'file_version_use_statement' => 'file_version.use_statement',
       'file_version_xlink_actuate_attribute' => 'file_version.xlink_actuate_attribute',
       'file_version_xlink_show_attribute' => 'file_version.xlink_show_attribute',
@@ -294,6 +291,16 @@ class DigitalObjectConverter < Converter
         :on_row_complete => Proc.new {|cache, extent|
           digital_object = cache.find {|obj| obj.class.record_type =~ /^digital_object/ }
           digital_object.extents << extent
+        }
+      },
+
+      :lang_material => {
+        :on_create => Proc.new {|data, obj|
+          obj.language_and_script = {'jsonmodel_type' => 'language_and_script', 'language' => data['language'], 'script' => data['script']}
+        },
+        :on_row_complete => Proc.new {|cache, this|
+          digital_object = cache.find {|obj| obj.class.record_type =~ /^digital_object/ }
+          digital_object.lang_materials << this
         }
       },
 

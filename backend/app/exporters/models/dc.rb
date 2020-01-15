@@ -9,14 +9,14 @@ class DCModel < ASpaceExport::ExportModel
   attr_accessor :subjects
   attr_accessor :dates
   attr_accessor :type
-  attr_accessor :language
+  attr_accessor :lang_materials
 
   
   
   @archival_object_map = {
     :title => :title=,
     :dates => :handle_date,
-    :language => :language=,
+    :lang_materials => :handle_langmaterials,
     :linked_agents => :handle_agents,
     :subjects => :handle_subjects
   }
@@ -29,6 +29,7 @@ class DCModel < ASpaceExport::ExportModel
     @subjects = []
     @sources = []
     @dates = []
+    @lang_materials = []
     @rights = []
     @json = obj
   end
@@ -50,9 +51,13 @@ class DCModel < ASpaceExport::ExportModel
     
     dc.apply_map(obj, @digital_object_map)
 
-    dc.identifier = "#{AppConfig[:backend_url]}#{obj.uri}"
+    if obj.respond_to?('uri')
+      dc.identifier = "#{AppConfig[:backend_url]}#{obj.uri}"
+    end
 
-    dc.type = obj.digital_object_type
+    if obj.respond_to?('digital_object_type')
+      dc.type = obj.digital_object_type
+    end
   
     dc
   end
@@ -83,47 +88,57 @@ class DCModel < ASpaceExport::ExportModel
   end
 
   def each_description
-    @json.notes.each do |note|
-      if self.class.DESCRIPTIVE_NOTE_TYPES.include? note['type']
-        yield extract_note_content(note)
+    if @json.respond_to?('notes')
+      @json.notes.each do |note|
+        if self.class.DESCRIPTIVE_NOTE_TYPES.include? note['type']
+          yield extract_note_content(note)
+        end
       end
+
+      repo = @json.repository['_resolved']
+      repo_info = "Digital object made available by #{repo['name']}"
+      repo_info << " (#{repo['url']})" if repo['url']
+
+      yield repo_info
     end
-
-    repo = @json.repository['_resolved']
-    repo_info = "Digital object made available by #{repo['name']}"
-    repo_info << " (#{repo['url']})" if repo['url']
-
-    yield repo_info
   end
 
   def each_rights
-    @json.notes.each do |note|
-      if self.class.RIGHTS_NOTE_TYPES.include? note['type']
-        yield extract_note_content(note)
+    if @json.respond_to?('notes')
+      @json.notes.each do |note|
+        if self.class.RIGHTS_NOTE_TYPES.include? note['type']
+          yield extract_note_content(note)
+        end
       end
     end
   end
 
   def each_format
-    @json.notes.each do |note|
-      if self.class.FORMAT_NOTE_TYPES.include? note['type']
-        yield extract_note_content(note)
+    if @json.respond_to?('notes')
+      @json.notes.each do |note|
+        if self.class.FORMAT_NOTE_TYPES.include? note['type']
+          yield extract_note_content(note)
+        end
       end
     end
   end
 
   def each_source
-    @json.notes.each do |note|
-      if self.class.SOURCE_NOTE_TYPES.include? note['type']
-        yield extract_note_content(note)
+    if @json.respond_to?('notes')
+      @json.notes.each do |note|
+        if self.class.SOURCE_NOTE_TYPES.include? note['type']
+          yield extract_note_content(note)
+        end
       end
     end
   end
 
   def each_relation
-    @json.notes.each do |note|
-      if self.class.RELATION_NOTE_TYPES.include? note['type']
-        yield extract_note_content(note)
+    if @json.respond_to?('notes')
+      @json.notes.each do |note|
+        if self.class.RELATION_NOTE_TYPES.include? note['type']
+          yield extract_note_content(note)
+        end
       end
     end
   end
@@ -145,6 +160,28 @@ class DCModel < ASpaceExport::ExportModel
   end
   
   
+  def handle_langmaterials(lang_materials)
+
+    language_vals = lang_materials.map{|l| l['language_and_script']}.compact
+    if !language_vals.empty?
+      language_vals.each do |language|
+        self.lang_materials << language['language']
+        if language['script']
+          self.lang_materials << language['script']
+        end
+      end
+    end
+
+    language_notes = lang_materials.map {|l| l['notes']}.compact.reject {|e|  e == [] }.flatten
+    if !language_notes.empty?
+      language_notes.each do |note|
+        self.lang_materials << extract_note_content(note)
+      end
+    end
+
+  end
+
+
   def handle_date(dates)
     dates.each do |date|
       self.dates << extract_date_string(date)

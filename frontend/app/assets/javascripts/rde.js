@@ -2,10 +2,11 @@
 //= require jquery.kiketable.colsizable-1.1
 //= require jquery.columnmanager.min
 //= require bootstrap-multiselect
+//= require linker
 
 $(function() {
 
-  $.fn.init_rapid_data_entry_form = function($modal, $node) {
+  $.fn.init_rapid_data_entry_form = function($modal, uri) {
     $(this).each(function() {
       var $rde_form = $(this);
       var $table = $("table#rdeTable", $rde_form);
@@ -13,6 +14,8 @@ $(function() {
       if ($rde_form.hasClass("initialised")) {
         return;
       }
+
+      $(".linker:not(.initialised)").linker();
 
       // Cookie Names
       var COOKIE_NAME_VISIBLE_COLUMN = "rde."+$rde_form.data("cookie-prefix")+".visible";
@@ -70,7 +73,7 @@ $(function() {
         COLUMN_ORDER = null;
 
         // reload the form
-        $(document).triggerHandler("rdeload.aspace", [$node, $modal]);
+        $(document).triggerHandler("rdeload.aspace", [uri, $modal]);
       });
 
       $modal.on("click", ".add-row", function(event) {
@@ -80,6 +83,8 @@ $(function() {
         var $row = addRow(event);
 
         $(":input:visible:first", $row).focus();
+
+        $(".linker:not(.initialised)").linker();
 
         validateRows($row);
       });
@@ -128,6 +133,12 @@ $(function() {
                 } else {
                   $target.removeAttr("checked");
                 }
+              } else if ($source.is(":hidden") && $source.parents().closest("div").hasClass("linker-wrapper")) {
+                // a linker!
+                $target.attr("data-selected", $source.val());
+              } else if ($source.is('.linker:text')) {
+                // $source is a yet to be initialized linker (when adding multiple rows)
+                $target.attr("data-selected", $source.attr("data-selected"));
               } else {
                 $target.val($source.val());
               }
@@ -227,6 +238,7 @@ $(function() {
       });
 
       var renderInlineErrors = function($rows, exception_data) {
+        $(".linker:not(.initialised)").linker();
         $rows.each(function(i, row) {
           var $row = $(row);
           var row_result = exception_data[i];
@@ -751,14 +763,9 @@ $(function() {
 
         var $templatesTable = $('table tbody', $manageContainer);
 
-        var templatesToDelete = [];
-
         $containerToggle.off("click").on("click", function(event) {
           event.preventDefault();
           event.stopPropagation();
-
-          templatesToDelete = [];
-
 
           // toggle other panel if it is active
           if (!$(this).hasClass("active")) {
@@ -776,15 +783,18 @@ $(function() {
           e.preventDefault();
           e.stopPropagation();
           $containerToggle.toggleClass("active");
-          $manageContainer.slideToggle(function() {
-            templatesToDelete = [];
-          });
+          $manageContainer.slideToggle();
         });
 
 
         $("button.btn-primary", $manageContainer).off("click").on("click", function(e) {
           e.preventDefault();
           e.stopPropagation();
+
+          var templatesToDelete = [];
+          $manageContainer.find(":checkbox:checked").each(function(){
+            templatesToDelete.push($(this).val());
+          });
 
           $.ajax({
             url: $rde_form.data("list-templates-uri") + "/batch_delete",
@@ -806,23 +816,17 @@ $(function() {
 
 
         var renderTable = function() {
+          if (templateList.length == 0) {
+            $(".no-templates-message", $manageContainer).show();
+            $(".btn-primary", $manageContainer).hide();
+            return;
+          } else {
+            $(".no-templates-message", $manageContainer).hide();
+            $(".btn-primary", $manageContainer).show();
+          }
+
           _.each(templateList, function(item) {
             $templatesTable.append(AS.renderTemplate("rde_template_table_row", {item: item}));
-          });
-
-          $("button", $templatesTable).click(function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            var $id = $(this).closest("tr").data('templateId');
-
-            if (_.indexOf(templatesToDelete, $id) > -1) {
-              _.remove(templatesToDelete, $id)
-              $(this).text("Remove");
-            } else {
-              templatesToDelete.push($id);
-              $(this).text("Keep");
-            }
           });
         };
 
@@ -986,6 +990,14 @@ $(function() {
             option_text += $colHeader.text();
 
             $option.val($colHeader.attr("id")).text(option_text);
+            if ($(this).hasClass('required')) {
+              $option.attr("disabled", true);
+              var colId = $(this).attr("id");
+              if (VISIBLE_COLUMN_IDS != null && $.inArray(colId, VISIBLE_COLUMN_IDS) < 0) {
+                VISIBLE_COLUMN_IDS.push(colId);
+              }
+              showColumn($(this).attr("columnIndex"));
+            }
             if (select_func($colHeader)) {
               $option.attr("selected", "selected");
             }
@@ -1277,21 +1289,23 @@ $(function() {
     $("select.selectpicker", $modal).selectpicker();
   };
 
-  $(document).bind("rdeload.aspace", function(event, $node, $modal) {
+  $(document).bind("rdeload.aspace", function(event, uri, $modal) {
+    var path = uri.replace(/^\/repositories\/[0-9]+\//, '');
+
     $.ajax({
-      url: APP_PATH+$node.attr("rel")+"s/"+$node.data("id")+"/rde",
+      url: AS.app_prefix(path+"/rde"),
       success: function(data) {
         $(".rde-wrapper", $modal).replaceWith("<div class='modal-body'></div>");
         $(".modal-body", $modal).replaceWith(data);
-        $("form", "#rapidDataEntryModal").init_rapid_data_entry_form($modal, $node);
+        $("form", "#rapidDataEntryModal").init_rapid_data_entry_form($modal, uri);
       }
     });
   });
 
   $(document).bind("rdeshow.aspace", function(event, $node, $button) {
-    var $modal = AS.openCustomModal("rapidDataEntryModal", $button.text(), AS.renderTemplate("modal_content_loading_template"), 'full', {keyboard: false}, $button);
+    var $modal = AS.openCustomModal("rapidDataEntryModal", $button.text(), AS.renderTemplate("modal_content_loading_template"), 'full', {backdrop: 'static', keyboard: false}, $button);
 
-    $(document).triggerHandler("rdeload.aspace", [$node, $modal]);
+    $(document).triggerHandler("rdeload.aspace", [$node.data('uri'), $modal]);
   });
 
 });

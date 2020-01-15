@@ -1,9 +1,8 @@
 ---
-title: Running ArchivesSpace against MySQL 
+title: Running ArchivesSpace against MySQL
 layout: en
-permalink: /user/running-archivesspace-against-mysql/ 
+permalink: /user/running-archivesspace-against-mysql/
 ---
-
 Out of the box, the ArchivesSpace distribution runs against an
 embedded database, but this is only suitable for demonstration
 purposes.  When you are ready to starting using ArchivesSpace with
@@ -21,7 +20,7 @@ Download the Connector and place it in a location where ArchivesSpace can
 find it on its classpath:
 
          $ cd lib
-         $ curl -Oq http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.39/mysql-connector-java-5.1.39.jar 
+         $ curl -Oq http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.39/mysql-connector-java-5.1.39.jar
 
 Note that the version of the MySQL connector may be different by the
 time you read this.
@@ -62,6 +61,6 @@ ArchivesSpace requires.  Run this with:
     scripts/setup-database.sh  # or setup-database.bat under Windows
 
 You can now follow the instructions in the "Getting Started" section to start
-your ArchivesSpace application. 
+your ArchivesSpace application.
 
-
+**NOTE: For MySQL 8. MySQL 8 uses a new method (caching_sha2_password) as the default authentication plugin instead of the old mysql_native_password that MySQL 5.7 and older used. This may require starting a MySQL 8 server with the `--default-authentication-plugin=mysql_native_password` option. You may also be able to change the auth mechanism on a per user basis by logging into mysql and running `ALTER USER 'archivesspace' IDENTIFIED WITH mysql_native_password BY '123456';`. Also be sure to have the LATEST [MySQL Connector for Java](http://dev.mysql.com/downloads/connector/j/) from MySQL in your /lib/ directory for ArchivesSpace. 

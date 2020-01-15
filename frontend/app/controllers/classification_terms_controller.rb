@@ -10,6 +10,7 @@ class ClassificationTermsController < ApplicationController
     @classification_term = JSONModel(:classification_term).new._always_valid!
     @classification_term.parent = {'ref' => JSONModel(:classification_term).uri_for(params[:classification_term_id])} if params.has_key?(:classification_term_id)
     @classification_term.classification = {'ref' => JSONModel(:classification).uri_for(params[:classification_id])} if params.has_key?(:classification_id)
+    @classification_term.position = params[:position]
 
     if user_prefs['default_values']
       defaults = DefaultValues.get 'classification_term'
@@ -37,12 +38,21 @@ class ClassificationTermsController < ApplicationController
                                       I18n.t("classification_term._frontend.messages.created_with_parent", JSONModelI18nWrapper.new(:classification_term => @classification_term, :classification => @classification_term['classification']['_resolved'], :parent => @classification_term['parent']['_resolved'])) :
                                       I18n.t("classification_term._frontend.messages.created", JSONModelI18nWrapper.new(:classification_term => @classification_term, :classification => @classification_term['classification']['_resolved']))
 
-                  @refresh_tree_node = true
-
                   if params.has_key?(:plus_one)
                     flash[:success] = success_message
                   else
                     flash.now[:success] = success_message
+                  end
+
+                  if @classification_term["is_slug_auto"] == false &&
+                      @classification_term["slug"] == nil &&
+                      params["classification_term"] &&
+                      params["classification_term"]["is_slug_auto"] == "1"
+                      if params.has_key?(:plus_one)
+                        flash[:warning] = I18n.t("slug.autogen_disabled")
+                      else
+                        flash.now[:warning] = I18n.t("slug.autogen_disabled")
+                      end
                   end
 
                   render_aspace_partial :partial => "classification_terms/edit_inline"
@@ -64,9 +74,15 @@ class ClassificationTermsController < ApplicationController
                   success_message = parent ?
                     I18n.t("classification_term._frontend.messages.updated_with_parent", JSONModelI18nWrapper.new(:classification_term => @classification_term, :classification => @classification_term['classification']['_resolved'], :parent => parent)) :
                     I18n.t("classification_term._frontend.messages.updated", JSONModelI18nWrapper.new(:classification_term => @classification_term, :classification => @classification_term['classification']['_resolved']))
+
                   flash.now[:success] = success_message
 
-                  @refresh_tree_node = true
+                  if @classification_term["is_slug_auto"] == false &&
+                     @classification_term["slug"] == nil &&
+                     params["classification_term"] &&
+                     params["classification_term"]["is_slug_auto"] == "1"
+                    flash.now[:warning] = I18n.t("slug.autogen_disabled")
+                  end
 
                   render_aspace_partial :partial => "edit_inline"
                 })
@@ -74,9 +90,11 @@ class ClassificationTermsController < ApplicationController
 
 
   def show
-    @classification_id = params['classification_id']
-    @classification_term = JSONModel(:classification_term).find(params[:id], find_opts)
-    render_aspace_partial :partial => "classification_terms/show_inline" if inline?
+    if params[:inline]
+      @classification_term = JSONModel(:classification_term).find(params[:id], find_opts)
+      return render_aspace_partial :partial => "classification_terms/show_inline"
+    end
+      @classification_id = params['classification_id']
   end
 
 

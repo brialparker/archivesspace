@@ -20,15 +20,20 @@ require "db/db_migrator"
 require 'fileutils'
 require "jsonmodel"
 require "asutils"
+require "ashttp"
 require "asconstants"
 require 'open-uri'
 require 'aspace_i18n'
+require 'log'
 require_relative 'exceptions'
-require_relative 'logging'
 require 'config/config-distribution'
 require_relative 'username'
 
-
+if AppConfig.changed?(:backend_log)
+  Log.logger(AppConfig[:backend_log])
+else
+  Log.logger($stderr)
+end
 
 class ASpaceEnvironment
 
@@ -43,6 +48,7 @@ class ASpaceEnvironment
     if environment != :auto
       @environment = environment
     elsif ENV["ASPACE_DEMO"] == 'true'
+      # to use this mechanism, put URL to demo database in AppConfig[:demo_data_url]
       download_demo_db
       @environment = :production
     else
@@ -63,7 +69,7 @@ class ASpaceEnvironment
 
   def self.download_demo_db
 
-    if File.exists?(File.join(Dir.tmpdir, 'data'))
+    if File.exist?(File.join(Dir.tmpdir, 'data'))
       puts "Data directory already exists at #{File.join(Dir.tmpdir, 'data')}."
       AppConfig[:data_directory] = File.join(Dir.tmpdir, 'data')
       return
@@ -77,7 +83,7 @@ class ASpaceEnvironment
       end
     end
 
-    if File.exists?(zip_file)
+    if File.exist?(zip_file)
       puts "Extracting data to #{Dir.tmpdir} directory"
       Zip::File.open(zip_file) do |zf|
         zf.each do |entry|

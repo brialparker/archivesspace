@@ -47,7 +47,9 @@
 
 
    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+   <field name="uri" type="string" indexed="true" stored="true" required="false" multiValued="false" />
    <field name="parent_id" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+   <field name="pui_parent_id" type="string" indexed="true" stored="true" required="false" multiValued="false" />
    <field name="four_part_id" type="text_general" indexed="true" stored="true" multiValued="false"/>
    <field name="title" type="text_general" indexed="true" stored="true" multiValued="false"/>
    <field name="types" type="string" indexed="true" stored="true" multiValued="true" />
@@ -57,14 +59,21 @@
    <field name="suppressed" type="boolean" indexed="true" stored="true" multiValued="false" />
    <field name="publish" type="boolean" indexed="true" stored="true" multiValued="false" />
    <field name="external_id" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="component_id" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="ref_id" type="string" indexed="true" stored="true" multiValued="false" />
 
    <field name="system_generated" type="boolean" indexed="true" stored="true" multiValued="false" />
 
    <field name="subjects" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="creators" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="agents" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="published_agents" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="agent_uris" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="published_agent_uris" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="related_agent_uris" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="notes" type="text_general" indexed="true" stored="true" multiValued="false"/>
+   <field name="years" type="int" indexed="true" stored="false" multiValued="true"/>
+   <field name="year_sort" type="sort_string" indexed="true" stored="false" multiValued="false"/>
 
    <field name="subjects_text" type="text_general" indexed="true" stored="true" multiValued="true"/>
    <field name="creators_text" type="text_general" indexed="true" stored="true" multiValued="true"/>
@@ -89,7 +98,7 @@
    <field name="use_restrictions" type="boolean" indexed="true" stored="true" multiValued="false" />
 
    <!-- Resource properties required for browse sorting -->
-   <field name="language" type="string" indexed="true" stored="true" multiValued="false" />
+   <!-- <field name="language" type="string" indexed="true" stored="true" multiValued="false" /> -->
    <field name="restrictions" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="ead_id" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="finding_aid_status" type="string" indexed="true" stored="true" multiValued="false" />
@@ -98,7 +107,9 @@
    <field name="digital_object_id" type="string" indexed="true" stored="true" multiValued="false" />
 
    <!-- Archival Objects store the URI of the resource they belong to (if any) -->
+   <!-- and the URIs for all ancestors in order of parent back up to the Resource -->
    <field name="resource" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="ancestors" type="string" indexed="true" stored="true" multiValued="true" />
 
    <!-- Digital Object properties required for facets -->
    <field name="digital_object_type" type="string" indexed="true" stored="true" multiValued="false"/>
@@ -138,6 +149,9 @@
    <!-- And for top-level records, the entire tree with all descendants -->
    <field name="whole_tree_json" type="string" indexed="false" stored="true" multiValued="false" />
 
+   <!-- Classification fields -->
+   <field name="has_classification_terms" type="boolean" indexed="true" stored="true" multiValued="false" />
+
    <!-- Classification terms store the URI of the resource they belong to (if any) -->
    <field name="classification" type="string" indexed="true" stored="true" multiValued="false" />
 
@@ -149,6 +163,11 @@
    <field name="classification_uris" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="location_uris" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="linked_record_uris" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="digital_object_uris" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="linked_instance_uris" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="related_accession_uris" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="related_resource_uris" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="rights_statement_agent_uris" type="string" indexed="true" stored="true" multiValued="true" />
 
    <!-- Event properties required for facets -->
    <field name="event_type" type="string" indexed="true" stored="true" multiValued="false" />
@@ -166,12 +185,39 @@
 
    <!-- Sort fields -->
    <field name="title_sort" type="sort_string" indexed="true" stored="false" multiValued="false"/>
+   <field name="repo_sort" type="sort_string" indexed="true" stored="false" multiValued="false"/>
+   <field name="identifier_sort" type="sort_string" indexed="true" stored="true" multiValued="false"/>
 
    <!-- Agent and Subject fields -->
    <field name="authority_id" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="source" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="rules" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="linked_agent_roles" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="used_within_repository" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="used_within_published_repository" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="is_user" type="boolean" indexed="true" stored="true" multiValued="false" />
+
+   <!-- Assessment fields -->
+   <field name="assessment_record_uris" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_records" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_collection_uris" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_collections" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_surveyor_uris" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_surveyors" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_survey_begin" type="date" indexed="true" stored="true" multiValued="false" />
+   <field name="assessment_survey_end" type="date" indexed="true" stored="true" multiValued="false" />
+   <field name="assessment_review_required" type="boolean" indexed="true" stored="true" multiValued="false" />
+   <field name="assessment_sensitive_material" type="boolean" indexed="true" stored="true" multiValued="false" />
+   <field name="assessment_reviewer_uris" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_reviewers" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_inactive" type="boolean" indexed="true" stored="true" multiValued="false" />
+   <field name="assessment_survey_year" type="int" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_record_types" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_completed" type="boolean" indexed="true" stored="true" multiValued="false" />
+   <field name="assessment_id" type="int" indexed="true" stored="true" multiValued="false" />
+   <field name="assessment_formats" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_ratings" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="assessment_conservation_issues" type="string" indexed="true" stored="true" multiValued="true" />
 
 
    <!-- Audit fields -->
@@ -180,6 +226,10 @@
    <field name="create_time" type="date" indexed="true" stored="true" multiValued="false"/>
    <field name="system_mtime" type="date" indexed="true" stored="true" multiValued="false"/>
    <field name="user_mtime" type="date" indexed="true" stored="true" multiValued="false"/>
+
+   <!-- Slug fields -->
+   <field name="slug" type="string" indexed="true" stored="true" multiValued="false"/>
+   <field name="is_slug_auto" type="boolean" indexed="true" stored="true" multiValued="false"/>
 
    <!-- Enum Fields -->
    <dynamicField name="*_enum_s"  type="string"  indexed="true"  stored="true" multiValued="true"/>
@@ -292,17 +342,19 @@
     <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
         <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" />
         <!-- in this example, we will only use synonyms at query time
         <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
         -->
         <filter class="solr.LowerCaseFilterFactory"/>
+	<filter class="solr.ASCIIFoldingFilterFactory"/>
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" />
         <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+	<filter class="solr.ASCIIFoldingFilterFactory"/>
       </analyzer>
     </fieldType>
 
@@ -316,7 +368,6 @@
  </types>
 
   <!-- Copy fields ... perhaps for sort fields -->
-  <copyField source="title" dest="title_sort"/>
   <copyField source="subjects" dest="subjects_text"/>
   <copyField source="agents" dest="agents_text"/>
   <copyField source="creators" dest="creators_text"/>

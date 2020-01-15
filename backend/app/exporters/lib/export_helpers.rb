@@ -43,7 +43,7 @@ module ASpaceExport
         results = []
         linked = self.linked_agents || []
         linked.each_with_index do |link, i|
-          next if link['role'] == 'creator'
+          next if link['role'] == 'creator' || (link['_resolved']['publish'] == false && !@include_unpublished)
           role = link['relator'] ? link['relator'] : (link['role'] == 'source' ? 'fmo' : nil)
 
           agent = link['_resolved'].dup
@@ -62,6 +62,7 @@ module ASpaceExport
                       when 'agent_person'; 'persname'
                       when 'agent_family'; 'famname'
                       when 'agent_corporate_entity'; 'corpname'
+                      when 'agent_software'; 'name'
                       end
 
           atts = {}
@@ -69,6 +70,7 @@ module ASpaceExport
           atts[:source] = source if source
           atts[:rules] = rules if rules
           atts[:authfilenumber] = authfilenumber if authfilenumber
+          atts[:audience] = 'internal' if link['_resolved']['publish'] == false
 
           results << {:node_name => node_name, :atts => atts, :content => content}
         end
@@ -126,19 +128,21 @@ module ASpaceExport
             normal_suffix = (date['date_type'] == 'single' || date['end'].nil? || date['end'] == date['begin']) ? date['begin'] : date['end']
             normal += normal_suffix ? normal_suffix : ""
           end
-          type = %w(single inclusive).include?(date['date_type']) ? 'inclusive' : 'bulk'
+          type = ( date['date_type'] == 'inclusive' ) ? 'inclusive' :  ( ( date['date_type'] == 'single') ? nil : 'bulk')
           content = if date['expression']
                     date['expression']
-                  elsif date['date_type'] == 'bulk'
-                    'bulk'
                   elsif date['end'].nil? || date['end'] == date['begin']
                     date['begin']
                   else
                     "#{date['begin']}-#{date['end']}"
                   end
 
-          atts = {:type => type}
+          atts = {}
+          atts[:type] = type if type
+          atts[:certainty] = date['certainty'] if date['certainty']
           atts[:normal] = normal unless normal.empty?
+          atts[:era] = date['era'] if date['era']
+          atts[:calendar] = date['calendar'] if date['calendar']
 
           results << {:content => content, :atts => atts}
         end
